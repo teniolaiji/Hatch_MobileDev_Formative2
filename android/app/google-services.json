@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "84611199449",
+    "project_id": "hatch-24bc6",
+    "storage_bucket": "hatch-24bc6.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:84611199449:android:d6865c754bec815ed7e9c8",
+        "android_client_info": {
+          "package_name": "dev.tee.hatch"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCowMaDuBOiTnSOc7pkG6PQR5E-NUEkC6c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
