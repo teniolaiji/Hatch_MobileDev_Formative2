@@ -6,26 +6,28 @@ import '../../features/auth/presentation/auth_providers.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
 import '../../features/auth/presentation/signup_screen.dart';
+import '../../features/auth/presentation/welcome_screen.dart';
 
 class Routes {
   Routes._();
   static const login = '/login';
   static const home = '/home';
   static const signup = '/signup';
+  static const welcome = '/welcome';
 }
 
 final routerProvider = Provider<GoRouter>((ref) {
   final authRepository = ref.watch(authRepositoryProvider);
 
   return GoRouter(
-    initialLocation: Routes.home,
+    initialLocation: Routes.welcome,
     refreshListenable: GoRouterRefreshStream(authRepository.authStateChanges),
     redirect: (context, state) {
       final loggedIn = authRepository.currentUser != null;
       final loc = state.matchedLocation;
-      final onAuthScreen = loc == Routes.login || loc == Routes.signup;
+      final onAuthScreen = loc == Routes.welcome || loc == Routes.login || loc == Routes.signup;
 
-      if (!loggedIn && !onAuthScreen) return Routes.login;
+      if (!loggedIn && !onAuthScreen) return Routes.welcome;
       if (loggedIn && onAuthScreen) return Routes.home;
       return null;
     },
@@ -41,6 +43,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: Routes.signup,
         builder: (context, state) => const SignupScreen(),
+      ),
+      GoRoute(
+        path: Routes.welcome,
+        builder: (context, state) => const WelcomeScreen(),
       ),
     ],
   );
