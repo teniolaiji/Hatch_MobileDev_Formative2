@@ -7,6 +7,8 @@ import '../../features/auth/presentation/login_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
 import '../../features/auth/presentation/signup_screen.dart';
 import '../../features/auth/presentation/welcome_screen.dart';
+import '../../features/onboarding/presentation/role_selection_screen.dart';
+import '../../features/auth/presentation/user_providers.dart';
 
 class Routes {
   Routes._();
@@ -14,6 +16,7 @@ class Routes {
   static const home = '/home';
   static const signup = '/signup';
   static const welcome = '/welcome';
+  static const onboarding = '/onboarding';
 }
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -25,10 +28,23 @@ final routerProvider = Provider<GoRouter>((ref) {
     redirect: (context, state) {
       final loggedIn = authRepository.currentUser != null;
       final loc = state.matchedLocation;
-      final onAuthScreen = loc == Routes.welcome || loc == Routes.login || loc == Routes.signup;
+      final onPublicScreen =
+          loc == Routes.welcome || loc == Routes.login || loc == Routes.signup;
 
-      if (!loggedIn && !onAuthScreen) return Routes.welcome;
-      if (loggedIn && onAuthScreen) return Routes.home;
+      // Not signed in: allow only the public screens.
+      if (!loggedIn) return onPublicScreen ? null : Routes.welcome;
+
+      // Signed in: do we have a profile yet?
+      final hasProfile = ref.read(currentUserProvider).value != null;
+
+      // Signed in but no role chosen yet -> onboarding.
+      if (!hasProfile && loc != Routes.onboarding) return Routes.onboarding;
+
+      // Onboarded but still sitting on a public or onboarding screen -> home.
+      if (hasProfile && (onPublicScreen || loc == Routes.onboarding)) {
+        return Routes.home;
+      }
+
       return null;
     },
     routes: [
@@ -47,6 +63,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: Routes.welcome,
         builder: (context, state) => const WelcomeScreen(),
+      ),
+      GoRoute(
+        path: Routes.onboarding,
+        builder: (context, state) => const RoleSelectionScreen(),
       ),
     ],
   );
