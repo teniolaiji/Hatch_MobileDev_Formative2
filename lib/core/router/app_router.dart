@@ -5,11 +5,13 @@ import 'package:go_router/go_router.dart';
 import '../../features/auth/presentation/auth_providers.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
+import '../../features/auth/presentation/signup_screen.dart';
 
 class Routes {
   Routes._();
   static const login = '/login';
   static const home = '/home';
+  static const signup = '/signup';
 }
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -20,12 +22,11 @@ final routerProvider = Provider<GoRouter>((ref) {
     refreshListenable: GoRouterRefreshStream(authRepository.authStateChanges),
     redirect: (context, state) {
       final loggedIn = authRepository.currentUser != null;
-      final goingToLogin = state.matchedLocation == Routes.login;
+      final loc = state.matchedLocation;
+      final onAuthScreen = loc == Routes.login || loc == Routes.signup;
 
-      if (!loggedIn && !goingToLogin) return Routes.login;
-
-      if (loggedIn && goingToLogin) return Routes.home;
-
+      if (!loggedIn && !onAuthScreen) return Routes.login;
+      if (loggedIn && onAuthScreen) return Routes.home;
       return null;
     },
     routes: [
@@ -36,6 +37,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: Routes.home,
         builder: (context, state) => const HomeScreen(),
+      ),
+      GoRoute(
+        path: Routes.signup,
+        builder: (context, state) => const SignupScreen(),
       ),
     ],
   );
