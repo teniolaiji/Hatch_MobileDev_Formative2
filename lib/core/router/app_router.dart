@@ -9,6 +9,8 @@ import '../../features/auth/presentation/signup_screen.dart';
 import '../../features/auth/presentation/welcome_screen.dart';
 import '../../features/onboarding/presentation/role_selection_screen.dart';
 import '../../features/auth/presentation/user_providers.dart';
+import '../../features/home/presentation/student_home_screen.dart';
+
 
 class Routes {
   Routes._();
@@ -54,7 +56,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: Routes.home,
-        builder: (context, state) => const HomeScreen(),
+        builder: (context, state) => const StudentHomeScreen(),
       ),
       GoRoute(
         path: Routes.signup,
