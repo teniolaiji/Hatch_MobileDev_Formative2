@@ -15,3 +15,16 @@ final topMatchProvider = Provider<Opportunity?>((ref) {
   final opportunities = ref.watch(opportunitiesProvider).value ?? [];
   return opportunities.isEmpty ? null : opportunities.first;
 });
+
+final searchQueryProvider = StateProvider<String>((ref) => '');
+
+final filteredOpportunitiesProvider = Provider<List<Opportunity>>((ref) {
+  final query = ref.watch(searchQueryProvider).trim().toLowerCase();
+  final all = ref.watch(opportunitiesProvider).value ?? [];
+  if (query.isEmpty) return all;
+  return all.where((o) {
+    final haystack =
+        [o.title, o.startupName, ...o.requiredSkills].join(' ').toLowerCase();
+    return haystack.contains(query);
+  }).toList();
+});
