@@ -6,6 +6,8 @@ import '../utils/greeting.dart';
 import '../models/opportunity.dart';
 import '../providers/user_providers.dart';
 import '../providers/opportunity_providers.dart';
+import 'package:go_router/go_router.dart';
+import 'package:hatch/router/app_router.dart';
 
 class StudentHomeScreen extends ConsumerWidget {
   const StudentHomeScreen({super.key});
@@ -36,11 +38,18 @@ class StudentHomeScreen extends ConsumerWidget {
             opportunitiesAsync.when(
               loading: () => const _HomeLoading(),
               error: (e, _) => const _HomeMessage(
-                  text: 'Could not load opportunities right now.'),
+                text: 'Could not load opportunities right now.',
+              ),
               data: (_) => topMatch == null
                   ? const _HomeMessage(
-                      text: 'No opportunities yet. Check back soon.')
+                      text: 'No opportunities yet. Check back soon.',
+                    )
                   : _TopMatchCard(opportunity: topMatch),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            OutlinedButton(
+              onPressed: () => context.push(Routes.discover),
+              child: const Text('Browse all opportunities'),
             ),
           ],
         ),
@@ -104,9 +113,9 @@ class _HomeLoading extends StatelessWidget {
   const _HomeLoading();
   @override
   Widget build(BuildContext context) => const Padding(
-        padding: EdgeInsets.all(AppSpacing.xl),
-        child: Center(child: CircularProgressIndicator()),
-      );
+    padding: EdgeInsets.all(AppSpacing.xl),
+    child: Center(child: CircularProgressIndicator()),
+  );
 }
 
 class _HomeMessage extends StatelessWidget {

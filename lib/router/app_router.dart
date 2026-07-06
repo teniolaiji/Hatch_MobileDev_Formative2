@@ -9,6 +9,7 @@ import '../screens/signup_screen.dart';
 import '../screens/role_selection_screen.dart';
 import '../screens/student_home_screen.dart';
 import '../screens/home_screen.dart';
+import 'package:hatch/screens/discover_screen.dart';
 
 class Routes {
   Routes._();
@@ -17,6 +18,7 @@ class Routes {
   static const signup = '/signup';
   static const welcome = '/welcome';
   static const onboarding = '/onboarding';
+  static const discover = '/discover';
 }
 
 class _RouterNotifier extends ChangeNotifier {
@@ -72,6 +74,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: Routes.home,
         builder: (context, state) => const StudentHomeScreen(),
+      ),
+      GoRoute(
+        path: Routes.discover,
+        builder: (context, state) => const DiscoverScreen(),
       ),
     ],
   );
