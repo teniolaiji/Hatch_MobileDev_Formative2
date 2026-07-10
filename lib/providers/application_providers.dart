@@ -13,3 +13,11 @@ final myApplicationsProvider = StreamProvider<List<Application>>((ref) {
   if (uid == null) return const Stream.empty();
   return ref.watch(applicationRepositoryProvider).watchMyApplications(uid);
 });
+
+final startupApplicationsProvider = StreamProvider<List<Application>>((ref) {
+  final user = ref.watch(currentUserProvider).value;
+  if (user == null) return Stream.value([]);
+  return ref
+      .watch(applicationRepositoryProvider)
+      .watchForStartup(user.uid);
+});
