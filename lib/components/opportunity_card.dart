@@ -3,6 +3,32 @@ import 'package:hatch/models/opportunity.dart';
 import 'package:hatch/theme/app_colors.dart';
 import 'package:hatch/theme/app_spacing.dart';
 
+class _SkillPill extends StatelessWidget {
+  const _SkillPill({required this.skill});
+  final String skill;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: AppSpacing.xs,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.navy,
+        borderRadius: BorderRadius.circular(AppRadius.xl),
+      ),
+      child: Text(
+        skill,
+        style: Theme.of(context)
+            .textTheme
+            .labelSmall
+            ?.copyWith(color: AppColors.stone),
+      ),
+    );
+  }
+}
+
 // A single opportunity as a tappable card in a feed.
 class OpportunityCard extends StatelessWidget {
   const OpportunityCard({super.key, required this.opportunity, this.onTap});
@@ -43,7 +69,7 @@ class OpportunityCard extends StatelessWidget {
                 runSpacing: AppSpacing.sm,
                 children: opportunity.requiredSkills
                     .take(4)
-                    .map((s) => Chip(label: Text(s)))
+                    .map((s) => _SkillPill(skill: s))
                     .toList(),
               ),
             ],

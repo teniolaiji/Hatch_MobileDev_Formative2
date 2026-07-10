@@ -11,8 +11,8 @@ class StatusBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (label, color) = switch (status) {
-      ApplicationStatus.submitted => ('Submitted', AppColors.textSecondary),
-      ApplicationStatus.reviewing => ('Reviewing', AppColors.textSecondary),
+      ApplicationStatus.submitted => ('Submitted', AppColors.ochre),
+      ApplicationStatus.reviewing => ('Reviewing', AppColors.ochre),
       ApplicationStatus.accepted => ('Accepted', AppColors.primary),
       ApplicationStatus.rejected => ('Rejected', AppColors.danger),
     };

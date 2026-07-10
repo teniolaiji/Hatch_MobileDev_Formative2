@@ -49,19 +49,22 @@ class _HomeBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
-    final topMatch = opportunities.isEmpty ? null : opportunities.first;
+    // Filter out corrupt docs (empty title = trailing-space field names in Firestore)
+    final validOpportunities =
+        opportunities.where((o) => o.title.isNotEmpty).toList();
+    final topMatch =
+        validOpportunities.isEmpty ? null : validOpportunities.first;
 
     return ListView(
       padding: EdgeInsets.zero,
       children: [
-        // ── Greeting ─────────────────────────────────────────────────────────
+        // ── Greeting ──────────────────────────────────────────────────────────
         Padding(
           padding: const EdgeInsets.fromLTRB(
               AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, 2),
           child: Text(
             greetingForNow(),
-            style: text.bodyMedium
-                ?.copyWith(color: AppColors.textSecondary),
+            style: text.bodyMedium?.copyWith(color: AppColors.stone),
           ),
         ),
         Padding(
@@ -69,66 +72,34 @@ class _HomeBody extends StatelessWidget {
               AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.xl),
           child: Text(
             firstName.isEmpty ? 'Welcome.' : '$firstName.',
-            style: text.displayMedium?.copyWith(
-              color: AppColors.textPrimary,
-              height: 1.1,
+            style: text.displayLarge?.copyWith(
+              color: AppColors.navy,
+              height: 1.0,
+              fontWeight: FontWeight.w700,
             ),
           ),
         ),
 
-        // ── Browse by category ────────────────────────────────────────────────
+        // ── Best match ────────────────────────────────────────────────────────
         Padding(
           padding: const EdgeInsets.fromLTRB(
-              AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.sm),
-          child: Text(
-            'BROWSE BY CATEGORY',
-            style: text.labelSmall?.copyWith(
-              color: AppColors.textSecondary,
-              letterSpacing: 1.2,
-            ),
-          ),
-        ),
-        SizedBox(
-          height: 84,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-            children: OpportunityCategory.values
-                .map((cat) => _CategoryTile(category: cat))
-                .toList(),
-          ),
-        ),
-
-        // ── Divider ───────────────────────────────────────────────────────────
-        Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.lg,
-            vertical: AppSpacing.lg,
-          ),
-          child: Divider(height: 1, color: AppColors.border),
-        ),
-
-        // ── Top match ─────────────────────────────────────────────────────────
-        Padding(
-          padding: const EdgeInsets.fromLTRB(
-              AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.sm),
+              AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.sm),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
                 'BEST MATCH',
                 style: text.labelSmall?.copyWith(
-                  color: AppColors.textSecondary,
+                  color: AppColors.navy,
                   letterSpacing: 1.2,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
               GestureDetector(
                 onTap: () => context.go(Routes.discover),
                 child: Text(
                   'See all →',
-                  style: text.labelSmall?.copyWith(
-                    color: AppColors.textPrimary,
-                  ),
+                  style: text.labelSmall?.copyWith(color: AppColors.taupe),
                 ),
               ),
             ],
@@ -144,6 +115,38 @@ class _HomeBody extends StatelessWidget {
                       ?.copyWith(color: AppColors.textSecondary),
                 )
               : _TopMatchCard(opportunity: topMatch),
+        ),
+
+        // ── Divider ───────────────────────────────────────────────────────────
+        Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.lg,
+            vertical: AppSpacing.lg,
+          ),
+          child: Divider(height: 1, color: AppColors.border),
+        ),
+
+        // ── Browse by category — fixed row ────────────────────────────────────
+        Padding(
+          padding: const EdgeInsets.fromLTRB(
+              AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.md),
+          child: Text(
+            'BROWSE BY CATEGORY',
+            style: text.labelSmall?.copyWith(
+              color: AppColors.navy,
+              letterSpacing: 1.2,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: OpportunityCategory.values
+                .map((cat) => _CategoryTile(category: cat))
+                .toList(),
+          ),
         ),
 
         const SizedBox(height: AppSpacing.lg),
@@ -179,33 +182,28 @@ class _CategoryTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
-    return Padding(
-      padding: const EdgeInsets.only(right: AppSpacing.sm),
-      child: GestureDetector(
-        onTap: () => context.go(Routes.discover),
-        child: Container(
-          width: 70,
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.circular(AppRadius.md),
-            border: Border.all(color: AppColors.border),
+    return GestureDetector(
+      onTap: () => context.go(Routes.discover),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 52,
+            height: 52,
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppColors.navy,
+            ),
+            child: Icon(_icon, size: 22, color: AppColors.cream),
           ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(_icon, size: 22, color: AppColors.textPrimary),
-              const SizedBox(height: AppSpacing.xs),
-              Text(
-                category.label,
-                style: text.labelSmall
-                    ?.copyWith(color: AppColors.textPrimary),
-                textAlign: TextAlign.center,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            category.label,
+            style: text.labelSmall
+                ?.copyWith(color: AppColors.textPrimary),
+            textAlign: TextAlign.center,
           ),
-        ),
+        ],
       ),
     );
   }
@@ -227,9 +225,8 @@ class _TopMatchCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(AppSpacing.lg),
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: AppColors.navy,
           borderRadius: BorderRadius.circular(AppRadius.lg),
-          border: Border.all(color: AppColors.border),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -241,7 +238,7 @@ class _TopMatchCard extends StatelessWidget {
                   child: Text(
                     opportunity.startupName.toUpperCase(),
                     style: text.labelSmall?.copyWith(
-                      color: AppColors.textSecondary,
+                      color: AppColors.ochre,
                       letterSpacing: 0.8,
                     ),
                   ),
@@ -252,34 +249,30 @@ class _TopMatchCard extends StatelessWidget {
                     vertical: 2,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.sand,
-                    borderRadius:
-                        BorderRadius.circular(AppRadius.sm),
+                    color: Colors.white.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(AppRadius.sm),
                   ),
                   child: Text(
                     opportunity.location == LocationType.remote
                         ? 'Remote'
                         : 'On-site',
-                    style: text.labelSmall?.copyWith(
-                      color: AppColors.taupe,
-                    ),
+                    style: text.labelSmall?.copyWith(color: AppColors.stone),
                   ),
                 ),
               ],
             ),
-
             const SizedBox(height: AppSpacing.xs),
-            Text(opportunity.title, style: text.headlineMedium),
+            Text(
+              opportunity.title,
+              style: text.headlineMedium?.copyWith(color: AppColors.cream),
+            ),
             const SizedBox(height: AppSpacing.sm),
             Text(
               opportunity.description,
-              style: text.bodyMedium
-                  ?.copyWith(color: AppColors.textSecondary),
+              style: text.bodyMedium?.copyWith(color: AppColors.stone),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
-
-            // Skills as icon + label
             if (opportunity.requiredSkills.isNotEmpty) ...[
               const SizedBox(height: AppSpacing.md),
               SingleChildScrollView(
@@ -292,14 +285,14 @@ class _TopMatchCard extends StatelessWidget {
                 ),
               ),
             ],
-
             const SizedBox(height: AppSpacing.md),
             Align(
               alignment: Alignment.centerRight,
               child: Text(
                 'View role →',
                 style: text.labelMedium?.copyWith(
-                  color: AppColors.textPrimary,
+                  color: AppColors.ochre,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ),
@@ -310,63 +303,30 @@ class _TopMatchCard extends StatelessWidget {
   }
 }
 
-// ── Skill icon + label ────────────────────────────────────────────────────────
+// ── Skill pill (on dark navy card) ───────────────────────────────────────────
 
 class _SkillIcon extends StatelessWidget {
   const _SkillIcon({required this.skill});
   final String skill;
 
-  IconData _icon() {
-    final s = skill.toLowerCase();
-    if (s.contains('flutter') || s.contains('dart') || s.contains('mobile')) {
-      return Icons.phone_android_rounded;
-    }
-    if (s.contains('react') || s.contains('vue') || s.contains('angular') ||
-        s.contains('web')) {
-      return Icons.web_rounded;
-    }
-    if (s.contains('python') || s.contains('java') || s.contains('backend') ||
-        s.contains('node')) {
-      return Icons.terminal_rounded;
-    }
-    if (s.contains('figma') || s.contains('ui') || s.contains('ux')) {
-      return Icons.brush_rounded;
-    }
-    if (s.contains('market') || s.contains('social') ||
-        s.contains('campaign') || s.contains('canva')) {
-      return Icons.campaign_rounded;
-    }
-    if (s.contains('data') || s.contains('analytic') || s.contains('sql')) {
-      return Icons.bar_chart_rounded;
-    }
-    if (s.contains('copy') || s.contains('writ') || s.contains('content')) {
-      return Icons.edit_rounded;
-    }
-    if (s.contains('video') || s.contains('film')) {
-      return Icons.videocam_rounded;
-    }
-    if (s.contains('research')) return Icons.science_rounded;
-    return Icons.star_outline_rounded;
-  }
-
   @override
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
     return Padding(
-      padding: const EdgeInsets.only(right: AppSpacing.md),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(_icon(), size: 18, color: AppColors.textSecondary),
-          const SizedBox(height: 2),
-          Text(
-            skill,
-            style: text.labelSmall
-                ?.copyWith(color: AppColors.textSecondary),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
+      padding: const EdgeInsets.only(right: AppSpacing.sm),
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.sm,
+          vertical: AppSpacing.xs,
+        ),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(AppRadius.xl),
+        ),
+        child: Text(
+          skill,
+          style: text.labelSmall?.copyWith(color: AppColors.stone),
+        ),
       ),
     );
   }

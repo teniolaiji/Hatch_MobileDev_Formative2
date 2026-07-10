@@ -37,4 +37,20 @@ class ApplicationRepository {
           return list;
         });
   }
+  // Live list of applications submitted to a given startup
+Stream<List<Application>> watchForStartup(String startupId) {
+  return _applications
+      .where('startupId', isEqualTo: startupId)
+      .snapshots()
+      .map((s) => s.docs
+          .map((d) => Application.fromMap(d.id, d.data()))
+          .toList()
+        ..sort((a, b) => b.createdAt.compareTo(a.createdAt)));
 }
+
+/// Update one application's status (accept or reject).
+Future<void> updateStatus(String applicationId, ApplicationStatus status) {
+  return _applications.doc(applicationId).update({'status': status.name});
+}
+}
+

@@ -76,7 +76,23 @@ class OpportunityDetailScreen extends ConsumerWidget {
                 spacing: AppSpacing.sm,
                 runSpacing: AppSpacing.sm,
                 children: opportunity.requiredSkills
-                    .map((s) => Chip(label: Text(s)))
+                    .map((s) => Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppSpacing.sm,
+                            vertical: AppSpacing.xs,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.navy,
+                            borderRadius: BorderRadius.circular(AppRadius.xl),
+                          ),
+                          child: Text(
+                            s,
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelSmall
+                                ?.copyWith(color: AppColors.stone),
+                          ),
+                        ))
                     .toList(),
               ),
             ],

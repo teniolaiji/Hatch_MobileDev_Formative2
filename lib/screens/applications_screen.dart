@@ -44,7 +44,7 @@ class ApplicationsScreen extends ConsumerWidget {
                 return Container(
                   padding: const EdgeInsets.all(AppSpacing.md),
                   decoration: BoxDecoration(
-                    color: AppColors.surface,
+                    color: AppColors.navy,
                     borderRadius: BorderRadius.circular(AppRadius.lg),
                     border: Border.all(color: AppColors.border),
                   ),
@@ -54,9 +54,13 @@ class ApplicationsScreen extends ConsumerWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(app.opportunityTitle, style: text.titleMedium),
+                            Text(app.opportunityTitle,
+                                style: text.titleMedium
+                                    ?.copyWith(color: AppColors.cream)),
                             const SizedBox(height: AppSpacing.xs),
-                            Text(app.startupId, style: text.bodyMedium),
+                            Text(app.startupId,
+                                style: text.bodyMedium
+                                    ?.copyWith(color: AppColors.stone)),
                           ],
                         ),
                       ),
