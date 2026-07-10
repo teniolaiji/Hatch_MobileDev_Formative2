@@ -33,7 +33,9 @@ class FounderApplicantsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final text = Theme.of(context).textTheme;
     final applicationsAsync = ref.watch(startupApplicationsProvider);
-
+    final pending = ref.watch(startupApplicationsProvider).value
+        ?.where((a) => a.status == ApplicationStatus.submitted).length ??
+    0;
     return Scaffold(
       appBar: AppBar(title: const Text('Applicants')),
       body: SafeArea(
@@ -58,7 +60,7 @@ class FounderApplicantsScreen extends ConsumerWidget {
             return ListView.separated(
               padding: const EdgeInsets.all(AppSpacing.lg),
               itemCount: applications.length,
-              separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.md),
+              separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.md),
               itemBuilder: (context, i) {
                 final app = applications[i];
                 return Container(

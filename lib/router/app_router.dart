@@ -19,6 +19,7 @@ import '../screens/founder_shell.dart';
 import '../screens/founder_home_screen.dart';
 import '../screens/founder_roles_screen.dart';
 import '../screens/founder_applicants_screen.dart';
+import '../screens/post_opportunity_screen.dart';
 
 class Routes {
   Routes._();
@@ -27,6 +28,7 @@ class Routes {
   static const signup = '/signup';
   static const onboarding = '/onboarding';
   static const opportunityDetail = '/opportunity';
+  static const postOpportunity = '/post-opportunity';
   // Student shell tabs
   static const studentHome = '/student/home';
   static const discover = '/student/discover';
@@ -97,6 +99,10 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: Routes.opportunityDetail,
         builder: (_, state) =>
             OpportunityDetailScreen(opportunity: state.extra as Opportunity),
+      ),
+      GoRoute(
+        path: Routes.postOpportunity,
+        builder: (context, context) => const PostOpportunityScreen(),
       ),
 
       // ── Student shell ─────────────────────────────────────────────────────

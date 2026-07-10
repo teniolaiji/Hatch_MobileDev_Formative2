@@ -35,7 +35,6 @@ class StudentHomeScreen extends ConsumerWidget {
   }
 }
 
-// ── Main body ─────────────────────────────────────────────────────────────────
 
 class _HomeBody extends StatelessWidget {
   const _HomeBody({
@@ -58,7 +57,7 @@ class _HomeBody extends StatelessWidget {
     return ListView(
       padding: EdgeInsets.zero,
       children: [
-        // ── Greeting ──────────────────────────────────────────────────────────
+        // Greeting
         Padding(
           padding: const EdgeInsets.fromLTRB(
               AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, 2),
@@ -79,8 +78,6 @@ class _HomeBody extends StatelessWidget {
             ),
           ),
         ),
-
-        // ── Best match ────────────────────────────────────────────────────────
         Padding(
           padding: const EdgeInsets.fromLTRB(
               AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.sm),
@@ -117,7 +114,6 @@ class _HomeBody extends StatelessWidget {
               : _TopMatchCard(opportunity: topMatch),
         ),
 
-        // ── Divider ───────────────────────────────────────────────────────────
         Padding(
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.lg,
@@ -126,12 +122,11 @@ class _HomeBody extends StatelessWidget {
           child: Divider(height: 1, color: AppColors.border),
         ),
 
-        // ── Browse by category — fixed row ────────────────────────────────────
         Padding(
           padding: const EdgeInsets.fromLTRB(
               AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.md),
           child: Text(
-            'BROWSE BY CATEGORY',
+            'CHOOSE CATEGORY',
             style: text.labelSmall?.copyWith(
               color: AppColors.navy,
               letterSpacing: 1.2,
@@ -151,7 +146,7 @@ class _HomeBody extends StatelessWidget {
 
         const SizedBox(height: AppSpacing.lg),
 
-        // ── Applications shortcut ─────────────────────────────────────────────
+        // Applications shortcut 
         Padding(
           padding: const EdgeInsets.fromLTRB(
               AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.xxl),
@@ -165,8 +160,7 @@ class _HomeBody extends StatelessWidget {
   }
 }
 
-// ── Category tile ─────────────────────────────────────────────────────────────
-
+//  Category tile 
 class _CategoryTile extends StatelessWidget {
   const _CategoryTile({required this.category});
   final OpportunityCategory category;
@@ -209,7 +203,7 @@ class _CategoryTile extends StatelessWidget {
   }
 }
 
-// ── Top match card ────────────────────────────────────────────────────────────
+// Top match card 
 
 class _TopMatchCard extends StatelessWidget {
   const _TopMatchCard({required this.opportunity});
@@ -303,7 +297,7 @@ class _TopMatchCard extends StatelessWidget {
   }
 }
 
-// ── Skill pill (on dark navy card) ───────────────────────────────────────────
+// ─Skill pill (on dark navy card) 
 
 class _SkillIcon extends StatelessWidget {
   const _SkillIcon({required this.skill});
@@ -332,7 +326,7 @@ class _SkillIcon extends StatelessWidget {
   }
 }
 
-// ── Error body ────────────────────────────────────────────────────────────────
+//  Error body 
 
 class _ErrorBody extends StatelessWidget {
   const _ErrorBody({required this.error});

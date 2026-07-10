@@ -17,4 +17,17 @@ class OpportunityRepository {
       return list;
     });
   }
+
+  Stream<List<Opportunity>> watchByOwner(String startupId) {
+    return _opportunities
+        .where('startupId', isEqualTo: startupId)
+        .snapshots()
+        .map((snapshot) {
+      final list = snapshot.docs
+          .map((doc) => Opportunity.fromMap(doc.id, doc.data()))
+          .toList();
+      list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      return list;
+    });
+  }
 }
