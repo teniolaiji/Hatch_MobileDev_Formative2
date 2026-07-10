@@ -1,29 +1,42 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../models/app_user.dart';
+import '../models/opportunity.dart';
 import '../providers/auth_providers.dart';
 import '../providers/user_providers.dart';
 import '../screens/welcome_screen.dart';
 import '../screens/login_screen.dart';
 import '../screens/signup_screen.dart';
 import '../screens/role_selection_screen.dart';
+import '../screens/opportunity_detail_screen.dart';
+import '../screens/student_shell.dart';
 import '../screens/student_home_screen.dart';
-import '../screens/home_screen.dart';
-import 'package:hatch/screens/discover_screen.dart';
-import 'package:hatch/screens/opportunity_detail_screen.dart';
-import 'package:hatch/models/opportunity.dart';
-import 'package:hatch/screens/applications_screen.dart';
+import '../screens/discover_screen.dart';
+import '../screens/applications_screen.dart';
+import '../screens/profile_screen.dart';
+import '../screens/founder_shell.dart';
+import '../screens/founder_home_screen.dart';
+import '../screens/founder_roles_screen.dart';
+import '../screens/founder_applicants_screen.dart';
 
 class Routes {
   Routes._();
-  static const login = '/login';
-  static const home = '/home';
-  static const signup = '/signup';
   static const welcome = '/welcome';
+  static const login = '/login';
+  static const signup = '/signup';
   static const onboarding = '/onboarding';
-  static const discover = '/discover';
   static const opportunityDetail = '/opportunity';
-  static const applications = '/applications';
+  // Student shell tabs
+  static const studentHome = '/student/home';
+  static const discover = '/student/discover';
+  static const applications = '/student/applications';
+  static const studentProfile = '/student/profile';
+  // Founder shell tabs
+  static const founderHome = '/founder/home';
+  static const founderRoles = '/founder/roles';
+  static const founderApplicants = '/founder/applicants';
+  static const founderProfile = '/founder/profile';
 }
 
 class _RouterNotifier extends ChangeNotifier {
@@ -44,17 +57,21 @@ final routerProvider = Provider<GoRouter>((ref) {
     redirect: (context, state) {
       final loggedIn = authRepository.currentUser != null;
       final loc = state.matchedLocation;
-      final onPublicScreen =
-          loc == Routes.welcome || loc == Routes.login || loc == Routes.signup;
+      final onPublicScreen = loc == Routes.welcome ||
+          loc == Routes.login ||
+          loc == Routes.signup;
 
       if (!loggedIn) return onPublicScreen ? null : Routes.welcome;
 
-      final hasProfile = ref.read(currentUserProvider).value != null;
+      final user = ref.read(currentUserProvider).value;
+      final hasProfile = user != null;
 
       if (!hasProfile && loc != Routes.onboarding) return Routes.onboarding;
 
       if (hasProfile && (onPublicScreen || loc == Routes.onboarding)) {
-        return Routes.home;
+        return user.role == UserRole.founder
+            ? Routes.founderHome
+            : Routes.studentHome;
       }
 
       return null;
@@ -62,36 +79,88 @@ final routerProvider = Provider<GoRouter>((ref) {
     routes: [
       GoRoute(
         path: Routes.welcome,
-        builder: (context, state) => const WelcomeScreen(),
+        builder: (_, __) => const WelcomeScreen(),
       ),
       GoRoute(
         path: Routes.login,
-        builder: (context, state) => const LoginScreen(),
+        builder: (_, __) => const LoginScreen(),
       ),
       GoRoute(
         path: Routes.signup,
-        builder: (context, state) => const SignupScreen(),
+        builder: (_, __) => const SignupScreen(),
       ),
       GoRoute(
         path: Routes.onboarding,
-        builder: (context, state) => const RoleSelectionScreen(),
-      ),
-      GoRoute(
-        path: Routes.home,
-        builder: (context, state) => const StudentHomeScreen(),
-      ),
-      GoRoute(
-        path: Routes.discover,
-        builder: (context, state) => const DiscoverScreen(),
+        builder: (_, __) => const RoleSelectionScreen(),
       ),
       GoRoute(
         path: Routes.opportunityDetail,
-        builder: (context, state) =>
+        builder: (_, state) =>
             OpportunityDetailScreen(opportunity: state.extra as Opportunity),
       ),
-      GoRoute(
-        path: Routes.applications,
-        builder: (context, state) => const ApplicationsScreen(),
+
+      // ── Student shell ─────────────────────────────────────────────────────
+      StatefulShellRoute.indexedStack(
+        builder: (_, __, navigationShell) =>
+            StudentShell(navigationShell: navigationShell),
+        branches: [
+          StatefulShellBranch(routes: [
+            GoRoute(
+              path: Routes.studentHome,
+              builder: (_, __) => const StudentHomeScreen(),
+            ),
+          ]),
+          StatefulShellBranch(routes: [
+            GoRoute(
+              path: Routes.discover,
+              builder: (_, __) => const DiscoverScreen(),
+            ),
+          ]),
+          StatefulShellBranch(routes: [
+            GoRoute(
+              path: Routes.applications,
+              builder: (_, __) => const ApplicationsScreen(),
+            ),
+          ]),
+          StatefulShellBranch(routes: [
+            GoRoute(
+              path: Routes.studentProfile,
+              builder: (_, __) => const ProfileScreen(),
+            ),
+          ]),
+        ],
+      ),
+
+      // ── Founder shell ─────────────────────────────────────────────────────
+      StatefulShellRoute.indexedStack(
+        builder: (_, __, navigationShell) =>
+            FounderShell(navigationShell: navigationShell),
+        branches: [
+          StatefulShellBranch(routes: [
+            GoRoute(
+              path: Routes.founderHome,
+              builder: (_, __) => const FounderHomeScreen(),
+            ),
+          ]),
+          StatefulShellBranch(routes: [
+            GoRoute(
+              path: Routes.founderRoles,
+              builder: (_, __) => const FounderRolesScreen(),
+            ),
+          ]),
+          StatefulShellBranch(routes: [
+            GoRoute(
+              path: Routes.founderApplicants,
+              builder: (_, __) => const FounderApplicantsScreen(),
+            ),
+          ]),
+          StatefulShellBranch(routes: [
+            GoRoute(
+              path: Routes.founderProfile,
+              builder: (_, __) => const ProfileScreen(),
+            ),
+          ]),
+        ],
       ),
     ],
   );

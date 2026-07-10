@@ -48,12 +48,12 @@ class StudentHomeScreen extends ConsumerWidget {
             ),
             const SizedBox(height: AppSpacing.lg),
             OutlinedButton(
-              onPressed: () => context.push(Routes.discover),
+              onPressed: () => context.go(Routes.discover),
               child: const Text('Browse all opportunities'),
             ),
             const SizedBox(height: AppSpacing.md),
             OutlinedButton(
-              onPressed: () => context.push(Routes.applications),
+              onPressed: () => context.go(Routes.applications),
               child: const Text('My applications'),
             ),
           ],
