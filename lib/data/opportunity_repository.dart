@@ -30,4 +30,9 @@ class OpportunityRepository {
       return list;
     });
   }
+
+  Future<void> create(Opportunity opportunity) async {
+    final doc = _opportunities.doc();
+    await doc.set(opportunity.toMap());
+  }
 }
