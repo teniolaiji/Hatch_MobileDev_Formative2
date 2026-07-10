@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class Opportunity {
   const Opportunity({
     required this.id,
@@ -34,8 +36,12 @@ class Opportunity {
         title: map['title'] as String,
         description: map['description'] as String? ?? '',
         requiredSkills: List<String>.from(map['requiredSkills'] as List? ?? []),
-        createdAt:
-            DateTime.tryParse(map['createdAt'] as String? ?? '') ??
-            DateTime.now(),
+        createdAt:_parseDate(map['createdAt']),
       );
+
+  static DateTime _parseDate(dynamic value) {
+    if (value is Timestamp) return value.toDate();
+    if (value is String) return DateTime.tryParse(value) ?? DateTime.now();
+    return DateTime.now();
+  }
 }
