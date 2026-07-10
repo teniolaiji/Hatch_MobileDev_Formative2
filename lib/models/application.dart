@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-enum ApplicationStatus { submitted, accepted, rejected }
-
+enum ApplicationStatus { submitted, reviewing, accepted, rejected }
 
 class Application {
   const Application({
@@ -37,12 +36,13 @@ class Application {
         'createdAt': createdAt.toIso8601String(),
       };
 
-  factory Application.fromMap(String id, Map<String, dynamic> map) => Application(
+  factory Application.fromMap(String id, Map<String, dynamic> map) =>
+      Application(
         id: id,
-        opportunityId: map['opportunityId'] as String,
+        opportunityId: map['opportunityId'] as String? ?? '',
         opportunityTitle: map['opportunityTitle'] as String? ?? '',
         startupId: map['startupId'] as String? ?? '',
-        applicantId: map['applicantId'] as String,
+        applicantId: map['applicantId'] as String? ?? '',
         applicantName: map['applicantName'] as String? ?? '',
         message: map['message'] as String? ?? '',
         status: ApplicationStatus.values.byName(

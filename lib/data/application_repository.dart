@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:hatch/models/application.dart';
+import '../models/application.dart';
 
-// Reads and writes the 'applications' collection.
 class ApplicationRepository {
   ApplicationRepository(this._db);
   final FirebaseFirestore _db;
@@ -9,31 +8,30 @@ class ApplicationRepository {
   CollectionReference<Map<String, dynamic>> get _applications =>
       _db.collection('applications');
 
-  // Create a new application. Firestore assigns the id.
-  Future<void> submit(Application application) {
-    return _applications.add(application.toMap());
+  Future<void> submit(Application application) async {
+    final doc = _applications.doc();
+    await doc.set({...application.toMap(), 'id': doc.id});
   }
 
   Future<bool> hasApplied({
     required String applicantId,
     required String opportunityId,
   }) async {
-    final snapshot = await _applications
+    final snap = await _applications
         .where('applicantId', isEqualTo: applicantId)
         .where('opportunityId', isEqualTo: opportunityId)
         .limit(1)
         .get();
-    return snapshot.docs.isNotEmpty;
+    return snap.docs.isNotEmpty;
   }
 
-  // Live list of a student's own applications, newest first.
-  Stream<List<Application>> watchForApplicant(String applicantId) {
+  Stream<List<Application>> watchMyApplications(String applicantId) {
     return _applications
         .where('applicantId', isEqualTo: applicantId)
+        .orderBy('createdAt', descending: true)
         .snapshots()
-        .map((s) => s.docs
-            .map((d) => Application.fromMap(d.id, d.data()))
-            .toList()
-          ..sort((a, b) => b.createdAt.compareTo(a.createdAt)));
+        .map((snap) => snap.docs
+            .map((doc) => Application.fromMap(doc.id, doc.data()))
+            .toList());
   }
 }
