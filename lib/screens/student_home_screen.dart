@@ -51,6 +51,11 @@ class StudentHomeScreen extends ConsumerWidget {
               onPressed: () => context.push(Routes.discover),
               child: const Text('Browse all opportunities'),
             ),
+            const SizedBox(height: AppSpacing.md),
+            OutlinedButton(
+              onPressed: () => context.push(Routes.applications),
+              child: const Text('My applications'),
+            ),
           ],
         ),
       ),
@@ -99,10 +104,8 @@ class _TopMatchCard extends StatelessWidget {
           Align(
             alignment: Alignment.centerLeft,
             child: ElevatedButton(
-              onPressed: () => context.push(
-                Routes.opportunityDetail,
-                extra: opportunity,
-              ),
+              onPressed: () =>
+                  context.push(Routes.opportunityDetail, extra: opportunity),
               child: const Text('View opportunity'),
             ),
           ),
