@@ -37,7 +37,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
               child: TextField(
                 controller: _search,
                 onChanged: (value) =>
-                    ref.read(searchQueryProvider.notifier).state = value,
+                    ref.read(searchQueryProvider.notifier).set(value),
                 decoration: InputDecoration(
                   hintText: 'Search roles, startups, skills',
                   prefixIcon: const Icon(Icons.search),
@@ -47,7 +47,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
                           icon: const Icon(Icons.close),
                           onPressed: () {
                             _search.clear();
-                            ref.read(searchQueryProvider.notifier).state = '';
+                            ref.read(searchQueryProvider.notifier).set('');
                           },
                         ),
                 ),

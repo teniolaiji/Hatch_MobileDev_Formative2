@@ -16,7 +16,14 @@ final topMatchProvider = Provider<Opportunity?>((ref) {
   return opportunities.isEmpty ? null : opportunities.first;
 });
 
-final searchQueryProvider = StateProvider<String>((ref) => '');
+class SearchQueryNotifier extends Notifier<String> {
+  @override
+  String build() => '';
+  void set(String query) => state = query;
+}
+
+final searchQueryProvider =
+    NotifierProvider<SearchQueryNotifier, String>(SearchQueryNotifier.new);
 
 final filteredOpportunitiesProvider = Provider<List<Opportunity>>((ref) {
   final query = ref.watch(searchQueryProvider).trim().toLowerCase();
