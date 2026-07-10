@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+enum LocationType { remote, onsite }
+
 class Opportunity {
   const Opportunity({
     required this.id,
@@ -9,6 +11,9 @@ class Opportunity {
     required this.description,
     required this.requiredSkills,
     required this.createdAt,
+    required this.location,
+    required this.timeCommitment,
+    this.deadline,
   });
 
   final String id;
@@ -18,6 +23,9 @@ class Opportunity {
   final String description;
   final List<String> requiredSkills;
   final DateTime createdAt;
+  final LocationType location;
+  final String timeCommitment;
+  final DateTime? deadline;
 
   Map<String, dynamic> toMap() => {
     'startupId': startupId,
@@ -26,6 +34,9 @@ class Opportunity {
     'description': description,
     'requiredSkills': requiredSkills,
     'createdAt': createdAt.toIso8601String(),
+    'location': location.name,
+    'timeCommitment': timeCommitment,
+    'deadline': deadline?.toIso8601String(),
   };
 
   factory Opportunity.fromMap(String id, Map<String, dynamic> map) =>
@@ -39,6 +50,11 @@ class Opportunity {
             ? List<String>.from(map['requiredSkills'] as List)
             : [],
         createdAt: _parseDate(map['createdAt']),
+        location: LocationType.values.byName(
+          map['location'] as String? ?? 'onsite',
+        ),
+        timeCommitment: map['timeCommitment'] as String? ?? '',
+        deadline: map['deadline'] == null ? null : _parseDate(map['deadline']),
       );
 
   static DateTime _parseDate(dynamic value) {
