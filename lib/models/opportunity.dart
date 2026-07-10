@@ -31,12 +31,12 @@ class Opportunity {
   factory Opportunity.fromMap(String id, Map<String, dynamic> map) =>
       Opportunity(
         id: id,
-        startupId: map['startupId'] as String,
+        startupId: map['startupId'] as String? ?? '',
         startupName: map['startupName'] as String? ?? '',
-        title: map['title'] as String,
+        title: map['title'] as String? ?? '',
         description: map['description'] as String? ?? '',
         requiredSkills: List<String>.from(map['requiredSkills'] as List? ?? []),
-        createdAt:_parseDate(map['createdAt']),
+        createdAt: _parseDate(map['createdAt']),
       );
 
   static DateTime _parseDate(dynamic value) {

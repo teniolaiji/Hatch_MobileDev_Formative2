@@ -10,7 +10,6 @@ class OpportunityRepository {
 
   Stream<List<Opportunity>> watchOpportunities() {
     return _opportunities
-        .orderBy('createdAt', descending: true)
         .snapshots()
         .map(
           (snapshot) => snapshot.docs
