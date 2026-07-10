@@ -35,3 +35,20 @@ final filteredOpportunitiesProvider = Provider<List<Opportunity>>((ref) {
     return haystack.contains(query);
   }).toList();
 });
+
+class SelectedCategory extends Notifier<OpportunityCategory?> {
+  @override
+  OpportunityCategory? build() => null;
+  void set(OpportunityCategory? value) => state = value;
+}
+
+final selectedCategoryProvider =
+    NotifierProvider<SelectedCategory, OpportunityCategory?>(
+        SelectedCategory.new);
+
+final opportunitiesByCategoryProvider = Provider<List<Opportunity>>((ref) {
+  final category = ref.watch(selectedCategoryProvider);
+  final all = ref.watch(opportunitiesProvider).value ?? [];
+  if (category == null) return all;
+  return all.where((o) => o.category == category).toList();
+});
