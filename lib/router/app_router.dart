@@ -10,6 +10,8 @@ import '../screens/role_selection_screen.dart';
 import '../screens/student_home_screen.dart';
 import '../screens/home_screen.dart';
 import 'package:hatch/screens/discover_screen.dart';
+import 'package:hatch/screens/opportunity_detail_screen.dart';
+import 'package:hatch/models/opportunity.dart';
 
 class Routes {
   Routes._();
@@ -19,6 +21,7 @@ class Routes {
   static const welcome = '/welcome';
   static const onboarding = '/onboarding';
   static const discover = '/discover';
+  static const opportunityDetail = '/opportunity';
 }
 
 class _RouterNotifier extends ChangeNotifier {
@@ -79,6 +82,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: Routes.discover,
         builder: (context, state) => const DiscoverScreen(),
       ),
+      GoRoute(
+  path: Routes.opportunityDetail,
+  builder: (context, state) =>
+      OpportunityDetailScreen(opportunity: state.extra as Opportunity),
+),
     ],
   );
 });

@@ -99,7 +99,10 @@ class _TopMatchCard extends StatelessWidget {
           Align(
             alignment: Alignment.centerLeft,
             child: ElevatedButton(
-              onPressed: () {},
+              onPressed: () => context.push(
+                Routes.opportunityDetail,
+                extra: opportunity,
+              ),
               child: const Text('View opportunity'),
             ),
           ),

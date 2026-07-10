@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hatch/components/opportunity_card.dart';
 import 'package:hatch/providers/opportunity_providers.dart';
+import 'package:hatch/router/app_router.dart';
 import 'package:hatch/theme/app_spacing.dart';
+import 'package:go_router/go_router.dart';
 
 class DiscoverScreen extends ConsumerStatefulWidget {
   const DiscoverScreen({super.key});
@@ -55,11 +57,12 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
             ),
             Expanded(
               child: opportunitiesAsync.when(
-                loading: () =>
-                    const Center(child: CircularProgressIndicator()),
+                loading: () => const Center(child: CircularProgressIndicator()),
                 error: (e, _) => Center(
-                  child: Text('Could not load opportunities.',
-                      style: text.bodyMedium),
+                  child: Text(
+                    'Could not load opportunities.',
+                    style: text.bodyMedium,
+                  ),
                 ),
                 data: (_) => results.isEmpty
                     ? Center(
@@ -76,12 +79,21 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
                       )
                     : ListView.separated(
                         padding: const EdgeInsets.fromLTRB(
-                            AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.lg),
+                          AppSpacing.lg,
+                          0,
+                          AppSpacing.lg,
+                          AppSpacing.lg,
+                        ),
                         itemCount: results.length,
                         separatorBuilder: (_, __) =>
                             const SizedBox(height: AppSpacing.md),
-                        itemBuilder: (context, i) =>
-                            OpportunityCard(opportunity: results[i]),
+                        itemBuilder: (context, i) => OpportunityCard(
+                          opportunity: results[i],
+                          onTap: () => context.push(
+                            Routes.opportunityDetail,
+                            extra: results[i],
+                          ),
+                        ),
                       ),
               ),
             ),
