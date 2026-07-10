@@ -30,6 +30,43 @@ class OpportunityDetailScreen extends ConsumerWidget {
             Text('About this role', style: text.titleMedium),
             const SizedBox(height: AppSpacing.sm),
             Text(opportunity.description, style: text.bodyLarge),
+            const SizedBox(height: AppSpacing.xl),
+            Text('Details', style: text.titleMedium),
+            const SizedBox(height: AppSpacing.sm),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(AppRadius.lg),
+                border: Border.all(color: AppColors.border),
+              ),
+              child: Column(
+                children: [
+                  _InfoRow(
+                    icon: opportunity.location == LocationType.remote
+                        ? Icons.language
+                        : Icons.location_on_outlined,
+                    label: 'Location',
+                    value: opportunity.location == LocationType.remote
+                        ? 'Remote'
+                        : 'On-site',
+                  ),
+                  if (opportunity.timeCommitment.isNotEmpty)
+                    _InfoRow(
+                      icon: Icons.schedule,
+                      label: 'Time',
+                      value: opportunity.timeCommitment,
+                    ),
+                  if (opportunity.deadline != null)
+                    _InfoRow(
+                      icon: Icons.event_outlined,
+                      label: 'Apply by',
+                      value:
+                          '${opportunity.deadline!.day}/${opportunity.deadline!.month}/${opportunity.deadline!.year}',
+                    ),
+                ],
+              ),
+            ),
 
             if (opportunity.requiredSkills.isNotEmpty) ...[
               const SizedBox(height: AppSpacing.xl),
@@ -161,6 +198,39 @@ class _ApplyButtonState extends ConsumerState<_ApplyButton> {
               ),
             )
           : const Text('Apply for this role'),
+    );
+  }
+}
+
+class _InfoRow extends StatelessWidget {
+  const _InfoRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+  final IconData icon;
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = Theme.of(context).textTheme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+      child: Row(
+        children: [
+          Icon(icon, size: 20, color: AppColors.textSecondary),
+          const SizedBox(width: AppSpacing.md),
+          Text('$label  ', style: text.bodyMedium),
+          Expanded(
+            child: Text(
+              value,
+              style: text.bodyLarge,
+              textAlign: TextAlign.right,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
