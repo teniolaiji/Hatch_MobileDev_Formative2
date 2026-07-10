@@ -69,51 +69,82 @@ class _ApplyButtonState extends ConsumerState<_ApplyButton> {
     final user = ref.read(currentUserProvider).value;
     if (user == null) return;
 
-    setState(() => _submitting = true);
     final repo = ref.read(applicationRepositoryProvider);
 
-    try {
-      final already = await repo.hasApplied(
-        applicantId: user.uid,
-        opportunityId: widget.opportunity.id,
-      );
-      if (already) {
-        if (mounted) {
-          setState(() => _submitting = false);
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('You already applied to this role.')),
-          );
-        }
-        return;
+    final already = await repo.hasApplied(
+      applicantId: user.uid,
+      opportunityId: widget.opportunity.id,
+    );
+    if (already) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('You already applied to this role.')),
+        );
       }
+      return;
+    }
 
-      await repo.submit(Application(
-        id: '',
-        opportunityId: widget.opportunity.id,
-        opportunityTitle: widget.opportunity.title,
-        startupId: widget.opportunity.startupId,
-        applicantId: user.uid,
-        applicantName: user.name,
-        message: '',
-        status: ApplicationStatus.submitted,
-        createdAt: DateTime.now(),
-      ));
+    final message = await _promptForMessage();
+    if (message == null) return; // user cancelled
 
+    setState(() => _submitting = true);
+    try {
+      await repo.submit(
+        Application(
+          id: '',
+          opportunityId: widget.opportunity.id,
+          opportunityTitle: widget.opportunity.title,
+          startupId: widget.opportunity.startupId,
+          applicantId: user.uid,
+          applicantName: user.name,
+          message: message,
+          status: ApplicationStatus.submitted,
+          createdAt: DateTime.now(),
+        ),
+      );
       if (mounted) {
         setState(() => _submitting = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Application submitted.')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Application submitted.')));
         Navigator.of(context).maybePop();
       }
     } catch (e) {
       if (mounted) {
         setState(() => _submitting = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Could not apply: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Could not apply: $e')));
       }
     }
+  }
+
+  //Opens a dialog for the applicant's message.
+  Future<String?> _promptForMessage() {
+    final controller = TextEditingController();
+    return showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Why are you a good fit?'),
+        content: TextField(
+          controller: controller,
+          maxLines: 10,
+          decoration: const InputDecoration(
+            hintText: 'Briefly explain why this role suits you.',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, controller.text.trim()),
+            child: const Text('Submit'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override

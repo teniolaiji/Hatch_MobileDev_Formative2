@@ -12,9 +12,13 @@ class OpportunityRepository {
     return _opportunities
         .snapshots()
         .map(
-          (snapshot) => snapshot.docs
-              .map((doc) => Opportunity.fromMap(doc.id, doc.data()))
-              .toList(),
+          (snapshot) {
+            final list = snapshot.docs
+                .map((doc) => Opportunity.fromMap(doc.id, doc.data()))
+                .toList();
+            list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+            return list;
+          },
         );
   }
 }

@@ -21,9 +21,9 @@ class AppUser {
       };
 
   factory AppUser.fromMap(Map<String, dynamic> map) => AppUser(
-        uid: map['uid'] as String,
-        email: map['email'] as String,
-        role: UserRole.values.byName(map['role'] as String),
-        name: map['name'] as String,
+        uid: map['uid']?.toString() ?? '',
+        email: map['email']?.toString() ?? '',
+        role: UserRole.values.byName(map['role']?.toString() ?? 'student'),
+        name: map['name']?.toString() ?? '',
       );
 }
