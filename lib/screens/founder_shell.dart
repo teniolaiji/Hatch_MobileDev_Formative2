@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-// The student's navigation shell
-class StudentShell extends StatelessWidget {
-  const StudentShell({super.key, required this.navigationShell});
+// The founder's navigation shell.
+class FounderShell extends StatelessWidget {
+  const FounderShell({super.key, required this.navigationShell});
   final StatefulNavigationShell navigationShell;
 
   @override
@@ -23,14 +23,14 @@ class StudentShell extends StatelessWidget {
             label: 'Home',
           ),
           NavigationDestination(
-            icon: Icon(Icons.explore_outlined),
-            selectedIcon: Icon(Icons.explore),
-            label: 'Discover',
+            icon: Icon(Icons.work_outline),
+            selectedIcon: Icon(Icons.work),
+            label: 'My roles',
           ),
           NavigationDestination(
-            icon: Icon(Icons.description_outlined),
-            selectedIcon: Icon(Icons.description),
-            label: 'Applications',
+            icon: Icon(Icons.people_outline),
+            selectedIcon: Icon(Icons.people),
+            label: 'Applicants',
           ),
           NavigationDestination(
             icon: Icon(Icons.person_outline),
