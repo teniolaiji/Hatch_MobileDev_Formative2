@@ -38,7 +38,7 @@ class ApplicationsScreen extends ConsumerWidget {
             return ListView.separated(
               padding: const EdgeInsets.all(AppSpacing.lg),
               itemCount: applications.length,
-              separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.md),
+              separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.md),
               itemBuilder: (context, i) {
                 final app = applications[i];
                 return Container(

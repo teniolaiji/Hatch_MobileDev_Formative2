@@ -28,10 +28,13 @@ class ApplicationRepository {
   Stream<List<Application>> watchMyApplications(String applicantId) {
     return _applications
         .where('applicantId', isEqualTo: applicantId)
-        .orderBy('createdAt', descending: true)
         .snapshots()
-        .map((snap) => snap.docs
-            .map((doc) => Application.fromMap(doc.id, doc.data()))
-            .toList());
+        .map((snap) {
+          final list = snap.docs
+              .map((doc) => Application.fromMap(doc.id, doc.data()))
+              .toList();
+          list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+          return list;
+        });
   }
 }

@@ -12,6 +12,7 @@ class StatusBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final (label, color) = switch (status) {
       ApplicationStatus.submitted => ('Submitted', AppColors.textSecondary),
+      ApplicationStatus.reviewing => ('Reviewing', AppColors.textSecondary),
       ApplicationStatus.accepted => ('Accepted', AppColors.primary),
       ApplicationStatus.rejected => ('Rejected', AppColors.danger),
     };
