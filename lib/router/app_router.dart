@@ -28,7 +28,7 @@ class Routes {
   static const signup = '/signup';
   static const onboarding = '/onboarding';
   static const opportunityDetail = '/opportunity';
-  static const postOpportunity = '/post-opportunity';
+  static const postOpportunity = '/founder/roles/post-opportunity';
   // Student shell tabs
   static const studentHome = '/student/home';
   static const discover = '/student/discover';
@@ -100,11 +100,6 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (_, state) =>
             OpportunityDetailScreen(opportunity: state.extra as Opportunity),
       ),
-      GoRoute(
-        path: Routes.postOpportunity,
-        builder: (context, context) => const PostOpportunityScreen(),
-      ),
-
       // ── Student shell ─────────────────────────────────────────────────────
       StatefulShellRoute.indexedStack(
         builder: (_, __, navigationShell) =>
@@ -152,6 +147,12 @@ final routerProvider = Provider<GoRouter>((ref) {
             GoRoute(
               path: Routes.founderRoles,
               builder: (_, __) => const FounderRolesScreen(),
+              routes: [
+                GoRoute(
+                  path: 'post-opportunity',
+                  builder: (_, __) => const PostOpportunityScreen(),
+                ),
+              ],
             ),
           ]),
           StatefulShellBranch(routes: [
