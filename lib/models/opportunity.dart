@@ -54,19 +54,32 @@ class Opportunity {
             ? List<String>.from(map['requiredSkills'] as List)
             : [],
         createdAt: _parseDate(map['createdAt']),
-        location: LocationType.values.byName(
-          map['location'] as String? ?? 'onsite',
-        ),
-        timeCommitment: map['timeCommitment'] as String? ?? '',
+        location: _parseLocation(map['location']?.toString()),
+        timeCommitment: map['timeCommitment']?.toString() ?? '',
         deadline: map['deadline'] == null ? null : _parseDate(map['deadline']),
-        category: OpportunityCategory.values.byName(
-    map['category'] as String? ?? 'operations'),
+        category: _parseCategory(map['category']?.toString()),
       );
 
   static DateTime _parseDate(dynamic value) {
     if (value is Timestamp) return value.toDate();
     if (value is String) return DateTime.tryParse(value) ?? DateTime.now();
     return DateTime.now();
+  }
+
+  static LocationType _parseLocation(String? value) {
+    try {
+      return LocationType.values.byName(value ?? 'onsite');
+    } catch (_) {
+      return LocationType.onsite;
+    }
+  }
+
+  static OpportunityCategory _parseCategory(String? value) {
+    try {
+      return OpportunityCategory.values.byName(value ?? 'other');
+    } catch (_) {
+      return OpportunityCategory.other;
+    }
   }
 }
 
