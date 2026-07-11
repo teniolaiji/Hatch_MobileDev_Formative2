@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../components/status_badge.dart';
 import '../models/opportunity.dart';
+import '../providers/application_providers.dart';
 import '../providers/user_providers.dart';
 import '../providers/opportunity_providers.dart';
 import '../router/app_router.dart';
@@ -154,15 +156,10 @@ class _HomeBody extends ConsumerWidget {
 
         const SizedBox(height: AppSpacing.lg),
 
-        // Applications shortcut
-        Padding(
-          padding: const EdgeInsets.fromLTRB(
-              AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.xxl),
-          child: OutlinedButton(
-            onPressed: () => context.go(Routes.applications),
-            child: const Text('My applications'),
-          ),
-        ),
+        // Application status tracker
+        _AppTracker(onSeeAll: () => context.go(Routes.applications)),
+
+        const SizedBox(height: AppSpacing.xxl),
       ],
     );
   }
@@ -335,7 +332,118 @@ class _SkillIcon extends StatelessWidget {
   }
 }
 
-//  Error body 
+// ── Application status tracker ────────────────────────────────────────────────
+
+class _AppTracker extends ConsumerWidget {
+  const _AppTracker({required this.onSeeAll});
+  final VoidCallback onSeeAll;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final text = Theme.of(context).textTheme;
+    final appsAsync = ref.watch(myApplicationsProvider);
+    final recent = appsAsync.value?.take(3).toList() ?? [];
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Section header
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'YOUR APPLICATIONS',
+                style: text.labelSmall?.copyWith(
+                  color: AppColors.navy,
+                  letterSpacing: 1.2,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              GestureDetector(
+                onTap: onSeeAll,
+                child: Text(
+                  'See all →',
+                  style: text.labelSmall?.copyWith(color: AppColors.taupe),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.sm),
+
+          // Card
+          Container(
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(AppRadius.lg),
+              border: Border.all(color: AppColors.border),
+            ),
+            child: recent.isEmpty
+                ? Padding(
+                    padding: const EdgeInsets.all(AppSpacing.md),
+                    child: Text(
+                      'No applications yet — find a role and apply.',
+                      style: text.bodyMedium
+                          ?.copyWith(color: AppColors.textSecondary),
+                    ),
+                  )
+                : Column(
+                    children: recent.asMap().entries.map((entry) {
+                      final i = entry.key;
+                      final app = entry.value;
+                      return Column(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppSpacing.md,
+                              vertical: AppSpacing.sm,
+                            ),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        app.opportunityTitle,
+                                        style: text.titleSmall?.copyWith(
+                                            color: AppColors.textPrimary),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      if (app.startupName.isNotEmpty) ...[
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          app.startupName,
+                                          style: text.bodySmall?.copyWith(
+                                              color: AppColors.stone),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(width: AppSpacing.sm),
+                                StatusBadge(status: app.status),
+                              ],
+                            ),
+                          ),
+                          if (i < recent.length - 1)
+                            Divider(
+                                height: 1, color: AppColors.border),
+                        ],
+                      );
+                    }).toList(),
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+//  Error body
 
 class _ErrorBody extends StatelessWidget {
   const _ErrorBody({required this.error});
