@@ -87,7 +87,7 @@ class _HomeBody extends ConsumerWidget {
     return ListView(
       padding: EdgeInsets.zero,
       children: [
-        // Greeting
+        // ── Greeting ─────────────────────────────────────────────────────
         Padding(
           padding: const EdgeInsets.fromLTRB(
               AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, 2),
@@ -98,7 +98,7 @@ class _HomeBody extends ConsumerWidget {
         ),
         Padding(
           padding: const EdgeInsets.fromLTRB(
-              AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.xl),
+              AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.lg),
           child: Text(
             firstName.isEmpty ? 'Welcome.' : '$firstName.',
             style: text.displayLarge?.copyWith(
@@ -108,11 +108,61 @@ class _HomeBody extends ConsumerWidget {
             ),
           ),
         ),
+
+        // ── Best match ───────────────────────────────────────────────────
+        Padding(
+          padding: const EdgeInsets.fromLTRB(
+              AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.sm),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'BEST MATCH',
+                style: text.labelSmall?.copyWith(
+                  color: AppColors.navy,
+                  letterSpacing: 1.2,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              GestureDetector(
+                onTap: () => context.go(Routes.discover),
+                child: Text(
+                  'See all →',
+                  style: text.labelSmall?.copyWith(color: AppColors.taupe),
+                ),
+              ),
+            ],
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(
+              AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.xl),
+          child: topMatch == null
+              ? Text(
+                  'No opportunities yet — check back soon.',
+                  style: text.bodyMedium
+                      ?.copyWith(color: AppColors.textSecondary),
+                )
+              : _TopMatchCard(opportunity: topMatch, score: topScore),
+        ),
+
         // ── Application stats ────────────────────────────────────────────
-        if (allApplications.isNotEmpty)
+        if (allApplications.isNotEmpty) ...[
           Padding(
             padding: const EdgeInsets.fromLTRB(
-                AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.lg),
+                AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.sm),
+            child: Text(
+              'YOUR APPLICATIONS',
+              style: text.labelSmall?.copyWith(
+                color: AppColors.navy,
+                letterSpacing: 1.2,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+                AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.xl),
             child: Row(
               children: [
                 _AppStatTile(
@@ -136,12 +186,13 @@ class _HomeBody extends ConsumerWidget {
               ],
             ),
           ),
+        ],
 
         // ── Saved roles shortcut ─────────────────────────────────────────
         if (savedIds.isNotEmpty)
           Padding(
             padding: const EdgeInsets.fromLTRB(
-                AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.lg),
+                AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.xl),
             child: GestureDetector(
               onTap: () {
                 ref.read(showSavedOnlyProvider.notifier).set(true);
@@ -175,55 +226,15 @@ class _HomeBody extends ConsumerWidget {
             ),
           ),
 
+        // ── Closing soon ─────────────────────────────────────────────────
+        const _DeadlineTracker(),
+
+        // ── Browse by category ───────────────────────────────────────────
         Padding(
           padding: const EdgeInsets.fromLTRB(
-              AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.sm),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'BEST MATCH',
-                style: text.labelSmall?.copyWith(
-                  color: AppColors.navy,
-                  letterSpacing: 1.2,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              GestureDetector(
-                onTap: () => context.go(Routes.discover),
-                child: Text(
-                  'See all →',
-                  style: text.labelSmall?.copyWith(color: AppColors.taupe),
-                ),
-              ),
-            ],
-          ),
-        ),
-
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-          child: topMatch == null
-              ? Text(
-                  'No opportunities yet — check back soon.',
-                  style: text.bodyMedium
-                      ?.copyWith(color: AppColors.textSecondary),
-                )
-              : _TopMatchCard(opportunity: topMatch, score: topScore),
-        ),
-
-        Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.lg,
-            vertical: AppSpacing.lg,
-          ),
-          child: Divider(height: 1, color: AppColors.border),
-        ),
-
-        Padding(
-          padding: const EdgeInsets.fromLTRB(
-              AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.md),
+              AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, AppSpacing.sm),
           child: Text(
-            'CHOOSE CATEGORY',
+            'BROWSE BY CATEGORY',
             style: text.labelSmall?.copyWith(
               color: AppColors.navy,
               letterSpacing: 1.2,
@@ -248,11 +259,6 @@ class _HomeBody extends ConsumerWidget {
                 .toList(),
           ),
         ),
-
-        const SizedBox(height: AppSpacing.lg),
-
-        // Deadline countdown
-        const _DeadlineTracker(),
 
         const SizedBox(height: AppSpacing.xxl),
       ],
