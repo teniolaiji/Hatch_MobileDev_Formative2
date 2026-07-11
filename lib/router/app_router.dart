@@ -23,6 +23,9 @@ import '../screens/post_opportunity_screen.dart';
 import '../screens/edit_about_screen.dart';
 import '../screens/edit_tags_screen.dart';
 import '../screens/edit_entries_screen.dart';
+import '../screens/applicant_detail_screen.dart';
+import 'package:hatch/screens/applicant_detail_screen.dart';
+import 'package:hatch/models/application.dart';
 
 class Routes {
   Routes._();
@@ -42,12 +45,14 @@ class Routes {
   static const founderRoles = '/founder/roles';
   static const founderApplicants = '/founder/applicants';
   static const founderProfile = '/founder/profile';
-  static const editAbout = '/profile/about';
   //edit profile tabs
+  static const editAbout = '/profile/about';
   static const editSkills = '/profile/skills';
   static const editInterests = '/profile/interests';
   static const editExperience = '/profile/experience';
   static const editEducation = '/profile/education';
+  // Applicant detail
+  static const applicantDetail = '/applicant';
 }
 
 class _RouterNotifier extends ChangeNotifier {
@@ -135,6 +140,11 @@ final routerProvider = Provider<GoRouter>((ref) {
           field: 'education',
           readEntries: (u) => (u as AppUser).education,
         ),
+      ),
+      GoRoute(
+        path: Routes.applicantDetail,
+        builder: (c, s) =>
+            ApplicantDetailScreen(application: s.extra as Application),
       ),
       // ── Student shell ─────────────────────────────────────────────────────
       StatefulShellRoute.indexedStack(

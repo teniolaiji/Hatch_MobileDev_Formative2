@@ -1,33 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hatch/components/status_badge.dart';
-import 'package:hatch/data/application_repository.dart';
 import 'package:hatch/models/application.dart';
 import 'package:hatch/providers/application_providers.dart';
+import 'package:hatch/router/app_router.dart';
 import 'package:hatch/theme/app_colors.dart';
 import 'package:hatch/theme/app_spacing.dart';
 
 class FounderApplicantsScreen extends ConsumerWidget {
   const FounderApplicantsScreen({super.key});
-
-  Future<void> _setStatus(
-    WidgetRef ref,
-    BuildContext context,
-    String id,
-    ApplicationStatus status,
-  ) async {
-    try {
-      await ref
-          .read(applicationRepositoryProvider)
-          .updateStatus(id, status);
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Could not update: $e')),
-        );
-      }
-    }
-  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -63,56 +45,45 @@ class FounderApplicantsScreen extends ConsumerWidget {
               separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.md),
               itemBuilder: (context, i) {
                 final app = applications[i];
-                return Container(
-                  padding: const EdgeInsets.all(AppSpacing.md),
-                  decoration: BoxDecoration(
-                    color: AppColors.surface,
-                    borderRadius: BorderRadius.circular(AppRadius.lg),
-                    border: Border.all(color: AppColors.border),
+                return InkWell(
+                  onTap: () => context.push(
+                    Routes.applicantDetail,
+                    extra: app,
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(app.applicantName,
-                                style: text.titleMedium),
+                  borderRadius: BorderRadius.circular(AppRadius.lg),
+                  child: Container(
+                    padding: const EdgeInsets.all(AppSpacing.md),
+                    decoration: BoxDecoration(
+                      color: AppColors.surface,
+                      borderRadius: BorderRadius.circular(AppRadius.lg),
+                      border: Border.all(color: AppColors.border),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(app.applicantName,
+                                  style: text.titleMedium),
+                              const SizedBox(height: AppSpacing.xs),
+                              Text(
+                                app.opportunityTitle,
+                                style: text.bodyMedium?.copyWith(
+                                    color: AppColors.textSecondary),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
                           ),
-                          StatusBadge(status: app.status),
-                        ],
-                      ),
-                      const SizedBox(height: AppSpacing.xs),
-                      Text('For: ${app.opportunityTitle}',
-                          style: text.bodyMedium),
-                      if (app.message.isNotEmpty) ...[
-                        const SizedBox(height: AppSpacing.sm),
-                        Text(app.message, style: text.bodyLarge),
-                      ],
-                      // Only show actions while still pending.
-                      if (app.status == ApplicationStatus.submitted) ...[
-                        const SizedBox(height: AppSpacing.md),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: OutlinedButton(
-                                onPressed: () => _setStatus(ref, context,
-                                    app.id, ApplicationStatus.rejected),
-                                child: const Text('Reject'),
-                              ),
-                            ),
-                            const SizedBox(width: AppSpacing.md),
-                            Expanded(
-                              child: ElevatedButton(
-                                onPressed: () => _setStatus(ref, context,
-                                    app.id, ApplicationStatus.accepted),
-                                child: const Text('Accept'),
-                              ),
-                            ),
-                          ],
                         ),
+                        const SizedBox(width: AppSpacing.md),
+                        StatusBadge(status: app.status),
+                        const SizedBox(width: AppSpacing.xs),
+                        Icon(Icons.chevron_right,
+                            size: 18, color: AppColors.stone),
                       ],
-                    ],
+                    ),
                   ),
                 );
               },
