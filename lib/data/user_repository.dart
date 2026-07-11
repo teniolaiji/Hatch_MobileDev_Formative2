@@ -21,4 +21,9 @@ class UserRepository {
   Future<void> updateSkills(String uid, List<String> skills) {
     return _users.doc(uid).update({'skills': skills});
   }
+
+  // Update any subset of a user's profile fields.
+  Future<void> updateProfile(String uid, Map<String, dynamic> fields) {
+    return _users.doc(uid).update(fields);
+  }
 }
