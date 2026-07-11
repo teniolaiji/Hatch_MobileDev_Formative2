@@ -5,7 +5,8 @@ class UserRepository {
   UserRepository(this._db);
   final FirebaseFirestore _db;
 
-  CollectionReference<Map<String, dynamic>> get _users => _db.collection('users');
+  CollectionReference<Map<String, dynamic>> get _users =>
+      _db.collection('users');
 
   Future<void> createUser(AppUser user) {
     return _users.doc(user.uid).set(user.toMap());
@@ -15,5 +16,9 @@ class UserRepository {
     final doc = await _users.doc(uid).get();
     if (!doc.exists) return null;
     return AppUser.fromMap(doc.data()!);
+  }
+
+  Future<void> updateSkills(String uid, List<String> skills) {
+    return _users.doc(uid).update({'skills': skills});
   }
 }
