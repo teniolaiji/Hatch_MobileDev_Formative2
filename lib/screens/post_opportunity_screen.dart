@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -62,7 +63,9 @@ class _PostOpportunityScreenState
 
     setState(() => _submitting = true);
     try {
-      await ref.read(opportunityRepositoryProvider).create(
+      await ref
+          .read(opportunityRepositoryProvider)
+          .create(
             Opportunity(
               id: '',
               startupId: user.uid,
@@ -76,8 +79,20 @@ class _PostOpportunityScreenState
               deadline: _deadline,
               category: _category,
             ),
-          );
+          )
+          .timeout(const Duration(seconds: 15));
       if (mounted) context.pop();
+    } on TimeoutException {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Timed out — Firestore rules may be blocking the write. Check your security rules.',
+            ),
+          ),
+        );
+        setState(() => _submitting = false);
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
