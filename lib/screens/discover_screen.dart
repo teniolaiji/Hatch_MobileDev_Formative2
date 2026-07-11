@@ -97,7 +97,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
               ),
             ),
 
-            // ── Active filter pills ──────────────────────────────────────────
+            
             if (activeFilters > 0)
               Padding(
                 padding: const EdgeInsets.fromLTRB(
@@ -111,7 +111,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
                             .read(selectedCategoryProvider.notifier)
                             .set(null),
                       ),
-                    if (category != null && _showSavedOnly)
+                    if (category != null && showSavedOnly)
                       const SizedBox(width: AppSpacing.sm),
                     if (showSavedOnly)
                       _FilterPill(
