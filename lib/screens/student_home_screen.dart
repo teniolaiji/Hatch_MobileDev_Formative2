@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../components/verified_badge.dart';
+import '../models/application.dart';
 import '../models/opportunity.dart';
 import '../providers/application_providers.dart';
 import '../providers/user_providers.dart';
@@ -52,6 +53,18 @@ class _HomeBody extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final text = Theme.of(context).textTheme;
     final userSkills = ref.watch(currentUserProvider).value?.skills ?? [];
+    final allApplications = ref.watch(myApplicationsProvider).value ?? [];
+
+    final submitted = allApplications
+        .where((a) => a.status == ApplicationStatus.submitted)
+        .length;
+    final reviewing = allApplications
+        .where((a) => a.status == ApplicationStatus.reviewing)
+        .length;
+    final accepted = allApplications
+        .where((a) => a.status == ApplicationStatus.accepted)
+        .length;
+
     // Filter out corrupt docs (empty title = trailing-space field names in Firestore)
     final validOpportunities =
         opportunities.where((o) => o.title.isNotEmpty).toList();
@@ -94,6 +107,35 @@ class _HomeBody extends ConsumerWidget {
             ),
           ),
         ),
+        // ── Application stats ────────────────────────────────────────────
+        if (allApplications.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+                AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.lg),
+            child: Row(
+              children: [
+                _AppStatTile(
+                  label: 'Submitted',
+                  value: '$submitted',
+                  onTap: () => context.go(Routes.applications),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                _AppStatTile(
+                  label: 'In review',
+                  value: '$reviewing',
+                  onTap: () => context.go(Routes.applications),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                _AppStatTile(
+                  label: 'Accepted',
+                  value: '$accepted',
+                  highlight: accepted > 0,
+                  onTap: () => context.go(Routes.applications),
+                ),
+              ],
+            ),
+          ),
+
         Padding(
           padding: const EdgeInsets.fromLTRB(
               AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.sm),
@@ -507,6 +549,64 @@ class _DeadlineTracker extends ConsumerWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ── Application stat tile ────────────────────────────────────────────────────
+
+class _AppStatTile extends StatelessWidget {
+  const _AppStatTile({
+    required this.label,
+    required this.value,
+    this.highlight = false,
+    this.onTap,
+  });
+
+  final String label;
+  final String value;
+  final bool highlight;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = Theme.of(context).textTheme;
+    final bg = highlight
+        ? AppColors.green.withValues(alpha: 0.08)
+        : AppColors.surface;
+    final border =
+        highlight ? AppColors.green.withValues(alpha: 0.3) : AppColors.border;
+    final valueColor = highlight ? AppColors.green : AppColors.navy;
+
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+              vertical: AppSpacing.md, horizontal: AppSpacing.sm),
+          decoration: BoxDecoration(
+            color: bg,
+            borderRadius: BorderRadius.circular(AppRadius.lg),
+            border: Border.all(color: border),
+          ),
+          child: Column(
+            children: [
+              Text(
+                value,
+                style: text.headlineMedium?.copyWith(
+                  color: valueColor,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                label,
+                style: text.labelSmall?.copyWith(color: AppColors.stone),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
