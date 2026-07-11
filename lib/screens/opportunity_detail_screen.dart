@@ -35,6 +35,7 @@ class OpportunityDetailScreen extends ConsumerWidget {
         ref.watch(savedOpportunityIdsProvider).contains(opportunity.id);
     final userSkillSet =
         (user?.skills ?? []).map((s) => s.toLowerCase()).toSet();
+    final expired = opportunity.isExpired;
 
     return Scaffold(
       appBar: AppBar(
@@ -54,6 +55,38 @@ class OpportunityDetailScreen extends ConsumerWidget {
         child: ListView(
           padding: const EdgeInsets.all(AppSpacing.lg),
           children: [
+            // ── Expired banner ───────────────────────────────────────────
+            if (expired) ...[
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md,
+                  vertical: AppSpacing.sm,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.stone.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(AppRadius.lg),
+                  border: Border.all(
+                      color: AppColors.stone.withValues(alpha: 0.3)),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.lock_outline,
+                        size: 16, color: AppColors.taupe),
+                    const SizedBox(width: AppSpacing.sm),
+                    Expanded(
+                      child: Text(
+                        'Applications for this role are now closed.',
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodySmall
+                            ?.copyWith(color: AppColors.taupe),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: AppSpacing.lg),
+            ],
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -116,10 +149,22 @@ class OpportunityDetailScreen extends ConsumerWidget {
           ],
         ),
       ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: _ApplyButton(opportunity: opportunity),
-      ),
+      bottomNavigationBar: isStudent
+          ? Padding(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child: expired
+                  ? ElevatedButton(
+                      onPressed: null,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.surface,
+                        foregroundColor: AppColors.taupe,
+                        side: const BorderSide(color: AppColors.border),
+                      ),
+                      child: const Text('Applications closed'),
+                    )
+                  : _ApplyButton(opportunity: opportunity),
+            )
+          : null,
     );
   }
 }

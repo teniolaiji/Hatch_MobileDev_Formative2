@@ -68,9 +68,10 @@ class _HomeBody extends ConsumerWidget {
         .where((a) => a.status == ApplicationStatus.accepted)
         .length;
 
-    // Filter out corrupt docs (empty title = trailing-space field names in Firestore)
-    final validOpportunities =
-        opportunities.where((o) => o.title.isNotEmpty).toList();
+    // Filter out corrupt docs and expired opportunities
+    final validOpportunities = opportunities
+        .where((o) => o.title.isNotEmpty && !o.isExpired)
+        .toList();
 
     // Pick best match: highest score when skills are set, otherwise newest
     final topMatch = validOpportunities.isEmpty

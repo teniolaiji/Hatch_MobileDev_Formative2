@@ -50,7 +50,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
     final opportunitiesAsync = ref.watch(opportunitiesProvider);
 
     var results = (opportunitiesAsync.value ?? [])
-        .where((o) => o.title.isNotEmpty)
+        .where((o) => o.title.isNotEmpty && !o.isExpired)
         .toList();
     if (category != null) {
       results = results.where((o) => o.category == category).toList();

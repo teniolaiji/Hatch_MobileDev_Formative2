@@ -32,6 +32,11 @@ class Opportunity {
   final OpportunityCategory category;
   final bool startupVerified;
 
+  /// True when a deadline has passed. Computed client-side so it is always
+  /// up-to-date without any Firestore writes.
+  bool get isExpired =>
+      deadline != null && deadline!.isBefore(DateTime.now());
+
   Map<String, dynamic> toMap() => {
     'startupId': startupId,
     'startupName': startupName,

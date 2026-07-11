@@ -112,6 +112,7 @@ class FounderRolesScreen extends ConsumerWidget {
                   const SizedBox(height: AppSpacing.md),
               itemBuilder: (context, i) => OpportunityCard(
                 opportunity: roles[i],
+                showExpired: true,
                 onTap: () =>
                     context.push(Routes.opportunityDetail, extra: roles[i]),
               ),
