@@ -24,6 +24,7 @@ import '../screens/edit_about_screen.dart';
 import '../screens/edit_tags_screen.dart';
 import '../screens/edit_entries_screen.dart';
 import '../screens/applicant_detail_screen.dart';
+import '../screens/edit_startup_screen.dart';
 import 'package:hatch/screens/applicant_detail_screen.dart';
 import 'package:hatch/models/application.dart';
 
@@ -51,6 +52,7 @@ class Routes {
   static const editInterests = '/profile/interests';
   static const editExperience = '/profile/experience';
   static const editEducation = '/profile/education';
+  static const editStartup = '/profile/startup';
   // Applicant detail
   static const applicantDetail = '/applicant';
 }
@@ -140,6 +142,10 @@ final routerProvider = Provider<GoRouter>((ref) {
           field: 'education',
           readEntries: (u) => (u as AppUser).education,
         ),
+      ),
+      GoRoute(
+        path: Routes.editStartup,
+        builder: (_, __) => const EditStartupScreen(),
       ),
       GoRoute(
         path: Routes.applicantDetail,

@@ -123,6 +123,31 @@ class ProfileScreen extends ConsumerWidget {
               ),
             ],
 
+            // ── Founder-only sections ────────────────────────────────────────
+            if (!isStudent && user != null) ...[
+              const SizedBox(height: AppSpacing.xl),
+
+              _Section(
+                title: 'Startup pitch',
+                onEdit: () => context.push(Routes.editStartup),
+                child: user.bio.isEmpty
+                    ? const _Empty(
+                        'Describe what your startup does and the problem it solves.')
+                    : Text(user.bio, style: text.bodyLarge),
+              ),
+
+              _Section(
+                title: 'Startup details',
+                onEdit: () => context.push(Routes.editStartup),
+                child: (user.startupStage.isEmpty && user.website.isEmpty)
+                    ? const _Empty('Add your stage and website.')
+                    : _StartupDetails(
+                        stage: user.startupStage,
+                        website: user.website,
+                      ),
+              ),
+            ],
+
             const SizedBox(height: AppSpacing.xl),
             OutlinedButton(
               onPressed: () => ref.read(authRepositoryProvider).signOut(),
@@ -189,6 +214,48 @@ class _Chips extends StatelessWidget {
         runSpacing: AppSpacing.sm,
         children: items.map((s) => Chip(label: Text(s))).toList(),
       );
+}
+
+class _StartupDetails extends StatelessWidget {
+  const _StartupDetails({required this.stage, required this.website});
+  final String stage;
+  final String website;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = Theme.of(context).textTheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (stage.isNotEmpty)
+          Row(
+            children: [
+              const Icon(Icons.rocket_launch_outlined,
+                  size: 16, color: AppColors.textSecondary),
+              const SizedBox(width: AppSpacing.xs),
+              Text(stage, style: text.bodyMedium),
+            ],
+          ),
+        if (stage.isNotEmpty && website.isNotEmpty)
+          const SizedBox(height: AppSpacing.xs),
+        if (website.isNotEmpty)
+          Row(
+            children: [
+              const Icon(Icons.link_rounded,
+                  size: 16, color: AppColors.textSecondary),
+              const SizedBox(width: AppSpacing.xs),
+              Expanded(
+                child: Text(
+                  website,
+                  style: text.bodyMedium?.copyWith(color: AppColors.navy),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+      ],
+    );
+  }
 }
 
 class _EntryList extends StatelessWidget {
