@@ -14,6 +14,7 @@ class AppUser {
     this.experience = const [],
     this.education = const [],
     this.isVerified = false,
+    this.savedOpportunities = const [],
   });
 
   final String uid;
@@ -26,6 +27,7 @@ class AppUser {
   final List<ProfileEntry> experience;
   final List<ProfileEntry> education;
   final bool isVerified;
+  final List<String> savedOpportunities;
   Map<String, dynamic> toMap() => {
     'uid': uid,
     'email': email,
@@ -37,6 +39,7 @@ class AppUser {
     'experience': experience.map((e) => e.toMap()).toList(),
     'education': education.map((e) => e.toMap()).toList(),
     'isVerified': isVerified,
+    'savedOpportunities': savedOpportunities,
   };
 
   factory AppUser.fromMap(Map<String, dynamic> map) => AppUser(
@@ -54,5 +57,7 @@ class AppUser {
         .map((e) => ProfileEntry.fromMap(e as Map<String, dynamic>))
         .toList(),
     isVerified: map['isVerified'] as bool? ?? false,
+    savedOpportunities:
+        List<String>.from(map['savedOpportunities'] as List? ?? []),
   );
 }

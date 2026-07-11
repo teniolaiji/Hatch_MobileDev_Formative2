@@ -5,6 +5,7 @@ import 'package:hatch/models/opportunity.dart';
 import 'package:hatch/theme/app_colors.dart';
 import 'package:hatch/theme/app_spacing.dart';
 import 'package:hatch/models/application.dart';
+import 'package:hatch/models/app_user.dart';
 import 'package:hatch/providers/application_providers.dart';
 import 'package:hatch/providers/user_providers.dart';
 
@@ -13,12 +14,40 @@ class OpportunityDetailScreen extends ConsumerWidget {
 
   final Opportunity opportunity;
 
+  Future<void> _toggleSave(WidgetRef ref) async {
+    final user = ref.read(currentUserProvider).value;
+    if (user == null) return;
+    final current = user.savedOpportunities;
+    final updated = current.contains(opportunity.id)
+        ? current.where((id) => id != opportunity.id).toList()
+        : [...current, opportunity.id];
+    await ref
+        .read(userRepositoryProvider)
+        .updateProfile(user.uid, {'savedOpportunities': updated});
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final text = Theme.of(context).textTheme;
+    final user = ref.watch(currentUserProvider).value;
+    final isStudent = user?.role == UserRole.student;
+    final isSaved =
+        ref.watch(savedOpportunityIdsProvider).contains(opportunity.id);
 
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        actions: [
+          if (isStudent)
+            IconButton(
+              icon: Icon(
+                isSaved ? Icons.bookmark : Icons.bookmark_border,
+                color: isSaved ? AppColors.navy : AppColors.stone,
+              ),
+              tooltip: isSaved ? 'Remove bookmark' : 'Save role',
+              onPressed: () => _toggleSave(ref),
+            ),
+        ],
+      ),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(AppSpacing.lg),

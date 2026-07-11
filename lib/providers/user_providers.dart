@@ -20,3 +20,10 @@ final userByIdProvider = FutureProvider.family<AppUser?, String>((
 ) async {
   return ref.watch(userRepositoryProvider).fetchUser(uid);
 });
+
+/// The current student's saved opportunity IDs as a Set for O(1) lookup.
+final savedOpportunityIdsProvider = Provider<Set<String>>((ref) {
+  final saved =
+      ref.watch(currentUserProvider).value?.savedOpportunities ?? [];
+  return saved.toSet();
+});

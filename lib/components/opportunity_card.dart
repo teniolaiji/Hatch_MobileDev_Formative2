@@ -37,11 +37,15 @@ class OpportunityCard extends StatelessWidget {
     required this.opportunity,
     this.onTap,
     this.score,
+    this.isSaved = false,
+    this.onToggleSave,
   });
 
   final Opportunity opportunity;
   final VoidCallback? onTap;
   final int? score;
+  final bool isSaved;
+  final VoidCallback? onToggleSave;
 
   @override
   Widget build(BuildContext context) {
@@ -90,6 +94,17 @@ class OpportunityCard extends StatelessWidget {
                           ?.copyWith(color: AppColors.navy),
                     ),
                   ),
+                if (onToggleSave != null) ...[
+                  const SizedBox(width: AppSpacing.xs),
+                  GestureDetector(
+                    onTap: onToggleSave,
+                    child: Icon(
+                      isSaved ? Icons.bookmark : Icons.bookmark_border,
+                      size: 20,
+                      color: isSaved ? AppColors.navy : AppColors.stone,
+                    ),
+                  ),
+                ],
               ],
             ),
             const SizedBox(height: AppSpacing.xs),
