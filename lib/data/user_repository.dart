@@ -16,7 +16,15 @@ class UserRepository {
     final doc = await _users.doc(uid).get();
     if (!doc.exists) return null;
     return AppUser.fromMap(doc.data()!);
-    
+  }
+
+  /// Real-time stream of a user document. Emits whenever the document changes
+  /// in Firestore — including external edits (e.g. setting isVerified in console).
+  Stream<AppUser?> watchUser(String uid) {
+    return _users.doc(uid).snapshots().map((snap) {
+      if (!snap.exists) return null;
+      return AppUser.fromMap(snap.data()!);
+    });
   }
 
   Future<void> updateSkills(String uid, List<String> skills) {

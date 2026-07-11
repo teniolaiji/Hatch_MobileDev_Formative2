@@ -8,10 +8,10 @@ final userRepositoryProvider = Provider<UserRepository>((ref) {
   return UserRepository(FirebaseFirestore.instance);
 });
 
-final currentUserProvider = FutureProvider<AppUser?>((ref) async {
+final currentUserProvider = StreamProvider<AppUser?>((ref) {
   final authUser = ref.watch(authStateChangesProvider).value;
-  if (authUser == null) return null;
-  return ref.watch(userRepositoryProvider).fetchUser(authUser.uid);
+  if (authUser == null) return Stream.value(null);
+  return ref.watch(userRepositoryProvider).watchUser(authUser.uid);
 });
 
 final userByIdProvider = FutureProvider.family<AppUser?, String>((

@@ -182,7 +182,8 @@ class FounderHomeScreen extends ConsumerWidget {
                                           CrossAxisAlignment.start,
                                       children: [
                                         Text(app.applicantName,
-                                            style: text.titleSmall),
+                                            style: text.titleSmall?.copyWith(
+                                                color: AppColors.textPrimary)),
                                         const SizedBox(height: 2),
                                         Text(
                                           app.opportunityTitle,
