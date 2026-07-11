@@ -20,6 +20,9 @@ import '../screens/founder_home_screen.dart';
 import '../screens/founder_roles_screen.dart';
 import '../screens/founder_applicants_screen.dart';
 import '../screens/post_opportunity_screen.dart';
+import '../screens/edit_about_screen.dart';
+import '../screens/edit_tags_screen.dart';
+import '../screens/edit_entries_screen.dart';
 
 class Routes {
   Routes._();
@@ -39,6 +42,12 @@ class Routes {
   static const founderRoles = '/founder/roles';
   static const founderApplicants = '/founder/applicants';
   static const founderProfile = '/founder/profile';
+  static const editAbout = '/profile/about';
+  //edit profile tabs
+  static const editSkills = '/profile/skills';
+  static const editInterests = '/profile/interests';
+  static const editExperience = '/profile/experience';
+  static const editEducation = '/profile/education';
 }
 
 class _RouterNotifier extends ChangeNotifier {
@@ -59,9 +68,8 @@ final routerProvider = Provider<GoRouter>((ref) {
     redirect: (context, state) {
       final loggedIn = authRepository.currentUser != null;
       final loc = state.matchedLocation;
-      final onPublicScreen = loc == Routes.welcome ||
-          loc == Routes.login ||
-          loc == Routes.signup;
+      final onPublicScreen =
+          loc == Routes.welcome || loc == Routes.login || loc == Routes.signup;
 
       if (!loggedIn) return onPublicScreen ? null : Routes.welcome;
 
@@ -79,18 +87,9 @@ final routerProvider = Provider<GoRouter>((ref) {
       return null;
     },
     routes: [
-      GoRoute(
-        path: Routes.welcome,
-        builder: (_, __) => const WelcomeScreen(),
-      ),
-      GoRoute(
-        path: Routes.login,
-        builder: (_, __) => const LoginScreen(),
-      ),
-      GoRoute(
-        path: Routes.signup,
-        builder: (_, __) => const SignupScreen(),
-      ),
+      GoRoute(path: Routes.welcome, builder: (_, __) => const WelcomeScreen()),
+      GoRoute(path: Routes.login, builder: (_, __) => const LoginScreen()),
+      GoRoute(path: Routes.signup, builder: (_, __) => const SignupScreen()),
       GoRoute(
         path: Routes.onboarding,
         builder: (_, __) => const RoleSelectionScreen(),
@@ -100,35 +99,80 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (_, state) =>
             OpportunityDetailScreen(opportunity: state.extra as Opportunity),
       ),
+      // ── Profile edit screens (pushed on top of the shell) ─────────────────
+      GoRoute(
+        path: Routes.editAbout,
+        builder: (_, __) => const EditAboutScreen(),
+      ),
+      GoRoute(
+        path: Routes.editSkills,
+        builder: (_, __) => EditTagsScreen(
+          title: 'Skills',
+          field: 'skills',
+          readTags: (u) => (u as AppUser).skills,
+        ),
+      ),
+      GoRoute(
+        path: Routes.editInterests,
+        builder: (_, __) => EditTagsScreen(
+          title: 'Interests',
+          field: 'interests',
+          readTags: (u) => (u as AppUser).interests,
+        ),
+      ),
+      GoRoute(
+        path: Routes.editExperience,
+        builder: (_, __) => EditEntriesScreen(
+          title: 'Experience',
+          field: 'experience',
+          readEntries: (u) => (u as AppUser).experience,
+        ),
+      ),
+      GoRoute(
+        path: Routes.editEducation,
+        builder: (_, __) => EditEntriesScreen(
+          title: 'Education',
+          field: 'education',
+          readEntries: (u) => (u as AppUser).education,
+        ),
+      ),
       // ── Student shell ─────────────────────────────────────────────────────
       StatefulShellRoute.indexedStack(
         builder: (_, __, navigationShell) =>
             StudentShell(navigationShell: navigationShell),
         branches: [
-          StatefulShellBranch(routes: [
-            GoRoute(
-              path: Routes.studentHome,
-              builder: (_, __) => const StudentHomeScreen(),
-            ),
-          ]),
-          StatefulShellBranch(routes: [
-            GoRoute(
-              path: Routes.discover,
-              builder: (_, __) => const DiscoverScreen(),
-            ),
-          ]),
-          StatefulShellBranch(routes: [
-            GoRoute(
-              path: Routes.applications,
-              builder: (_, __) => const ApplicationsScreen(),
-            ),
-          ]),
-          StatefulShellBranch(routes: [
-            GoRoute(
-              path: Routes.studentProfile,
-              builder: (_, __) => const ProfileScreen(),
-            ),
-          ]),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Routes.studentHome,
+                builder: (_, __) => const StudentHomeScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Routes.discover,
+                builder: (_, __) => const DiscoverScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Routes.applications,
+                builder: (_, __) => const ApplicationsScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Routes.studentProfile,
+                builder: (_, __) => const ProfileScreen(),
+              ),
+            ],
+          ),
         ],
       ),
 
@@ -137,36 +181,44 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (_, __, navigationShell) =>
             FounderShell(navigationShell: navigationShell),
         branches: [
-          StatefulShellBranch(routes: [
-            GoRoute(
-              path: Routes.founderHome,
-              builder: (_, __) => const FounderHomeScreen(),
-            ),
-          ]),
-          StatefulShellBranch(routes: [
-            GoRoute(
-              path: Routes.founderRoles,
-              builder: (_, __) => const FounderRolesScreen(),
-              routes: [
-                GoRoute(
-                  path: 'post-opportunity',
-                  builder: (_, __) => const PostOpportunityScreen(),
-                ),
-              ],
-            ),
-          ]),
-          StatefulShellBranch(routes: [
-            GoRoute(
-              path: Routes.founderApplicants,
-              builder: (_, __) => const FounderApplicantsScreen(),
-            ),
-          ]),
-          StatefulShellBranch(routes: [
-            GoRoute(
-              path: Routes.founderProfile,
-              builder: (_, __) => const ProfileScreen(),
-            ),
-          ]),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Routes.founderHome,
+                builder: (_, __) => const FounderHomeScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Routes.founderRoles,
+                builder: (_, __) => const FounderRolesScreen(),
+                routes: [
+                  GoRoute(
+                    path: 'post-opportunity',
+                    builder: (_, __) => const PostOpportunityScreen(),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Routes.founderApplicants,
+                builder: (_, __) => const FounderApplicantsScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Routes.founderProfile,
+                builder: (_, __) => const ProfileScreen(),
+              ),
+            ],
+          ),
         ],
       ),
     ],
