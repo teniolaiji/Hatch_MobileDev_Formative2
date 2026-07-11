@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hatch/components/opportunity_card.dart';
 import 'package:hatch/models/opportunity.dart';
 import 'package:hatch/providers/opportunity_providers.dart';
+import 'package:hatch/providers/user_providers.dart';
+import 'package:hatch/utils/match_score.dart';
 import 'package:hatch/router/app_router.dart';
 import 'package:hatch/theme/app_colors.dart';
 import 'package:hatch/theme/app_spacing.dart';
@@ -30,6 +32,8 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
     final rawQuery = ref.watch(searchQueryProvider);
     final query = rawQuery.trim().toLowerCase();
     final category = ref.watch(selectedCategoryProvider);
+    final userSkills =
+        ref.watch(currentUserProvider).value?.skills ?? [];
     final opportunitiesAsync = ref.watch(opportunitiesProvider);
 
     // Inline filtering so THIS widget directly subscribes to category/query
@@ -149,6 +153,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
                             const SizedBox(height: AppSpacing.md),
                         itemBuilder: (context, i) => OpportunityCard(
                           opportunity: results[i],
+                          score: computeMatchScore(userSkills, results[i]),
                           onTap: () => context.push(
                             Routes.opportunityDetail,
                             extra: results[i],

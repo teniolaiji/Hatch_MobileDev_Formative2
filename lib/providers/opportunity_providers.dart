@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/opportunity_repository.dart';
 import '../models/opportunity.dart';
 import '../providers/user_providers.dart';
+import '../utils/match_score.dart';
 
 final opportunityRepositoryProvider = Provider<OpportunityRepository>((ref) {
   return OpportunityRepository(FirebaseFirestore.instance);
@@ -24,7 +25,14 @@ List<Opportunity> _valid(List<Opportunity> list) =>
 
 final topMatchProvider = Provider<Opportunity?>((ref) {
   final opportunities = _valid(ref.watch(opportunitiesProvider).value ?? []);
-  return opportunities.isEmpty ? null : opportunities.first;
+  if (opportunities.isEmpty) return null;
+  final skills = ref.watch(currentUserProvider).value?.skills ?? [];
+  if (skills.isEmpty) return opportunities.first; // fall back to newest
+  return opportunities.reduce((best, opp) {
+    final bScore = computeMatchScore(skills, best) ?? 0;
+    final oScore = computeMatchScore(skills, opp) ?? 0;
+    return oScore > bScore ? opp : best;
+  });
 });
 
 class SearchQueryNotifier extends Notifier<String> {

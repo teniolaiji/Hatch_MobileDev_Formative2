@@ -9,6 +9,7 @@ import '../router/app_router.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
 import '../utils/greeting.dart';
+import '../utils/match_score.dart';
 
 class StudentHomeScreen extends ConsumerWidget {
   const StudentHomeScreen({super.key});
@@ -49,11 +50,24 @@ class _HomeBody extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final text = Theme.of(context).textTheme;
+    final userSkills = ref.watch(currentUserProvider).value?.skills ?? [];
     // Filter out corrupt docs (empty title = trailing-space field names in Firestore)
     final validOpportunities =
         opportunities.where((o) => o.title.isNotEmpty).toList();
-    final topMatch =
-        validOpportunities.isEmpty ? null : validOpportunities.first;
+
+    // Pick best match: highest score when skills are set, otherwise newest
+    final topMatch = validOpportunities.isEmpty
+        ? null
+        : (userSkills.isEmpty
+            ? validOpportunities.first
+            : validOpportunities.reduce((best, opp) {
+                final b = computeMatchScore(userSkills, best) ?? 0;
+                final o = computeMatchScore(userSkills, opp) ?? 0;
+                return o > b ? opp : best;
+              }));
+
+    final topScore =
+        topMatch != null ? computeMatchScore(userSkills, topMatch) : null;
 
     return ListView(
       padding: EdgeInsets.zero,
@@ -112,7 +126,7 @@ class _HomeBody extends ConsumerWidget {
                   style: text.bodyMedium
                       ?.copyWith(color: AppColors.textSecondary),
                 )
-              : _TopMatchCard(opportunity: topMatch),
+              : _TopMatchCard(opportunity: topMatch, score: topScore),
         ),
 
         Padding(
@@ -211,8 +225,9 @@ class _CategoryTile extends StatelessWidget {
 // Top match card 
 
 class _TopMatchCard extends StatelessWidget {
-  const _TopMatchCard({required this.opportunity});
+  const _TopMatchCard({required this.opportunity, this.score});
   final Opportunity opportunity;
+  final int? score;
 
   @override
   Widget build(BuildContext context) {
@@ -230,7 +245,7 @@ class _TopMatchCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Startup name + location badge
+            // Startup name + score badge + location badge
             Row(
               children: [
                 Expanded(
@@ -242,6 +257,24 @@ class _TopMatchCard extends StatelessWidget {
                     ),
                   ),
                 ),
+                if (score != null) ...[
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.sm,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.ochre.withValues(alpha: 0.18),
+                      borderRadius: BorderRadius.circular(AppRadius.xl),
+                    ),
+                    child: Text(
+                      '$score% match',
+                      style: text.labelSmall
+                          ?.copyWith(color: AppColors.ochre),
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                ],
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: AppSpacing.sm,

@@ -31,10 +31,16 @@ class _SkillPill extends StatelessWidget {
 
 // A single opportunity as a tappable card in a feed.
 class OpportunityCard extends StatelessWidget {
-  const OpportunityCard({super.key, required this.opportunity, this.onTap});
+  const OpportunityCard({
+    super.key,
+    required this.opportunity,
+    this.onTap,
+    this.score,
+  });
 
   final Opportunity opportunity;
   final VoidCallback? onTap;
+  final int? score;
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +58,30 @@ class OpportunityCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(opportunity.startupName, style: text.labelLarge),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(opportunity.startupName,
+                      style: text.labelLarge),
+                ),
+                if (score != null)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.sm,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.navy.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(AppRadius.xl),
+                    ),
+                    child: Text(
+                      '$score% match',
+                      style: text.labelSmall
+                          ?.copyWith(color: AppColors.navy),
+                    ),
+                  ),
+              ],
+            ),
             const SizedBox(height: AppSpacing.xs),
             Text(opportunity.title, style: text.titleLarge),
             const SizedBox(height: AppSpacing.sm),
