@@ -54,6 +54,7 @@ class _HomeBody extends ConsumerWidget {
     final text = Theme.of(context).textTheme;
     final userSkills = ref.watch(currentUserProvider).value?.skills ?? [];
     final allApplications = ref.watch(myApplicationsProvider).value ?? [];
+    final savedIds = ref.watch(savedOpportunityIdsProvider);
 
     final submitted = allApplications
         .where((a) => a.status == ApplicationStatus.submitted)
@@ -133,6 +134,44 @@ class _HomeBody extends ConsumerWidget {
                   onTap: () => context.go(Routes.applications),
                 ),
               ],
+            ),
+          ),
+
+        // ── Saved roles shortcut ─────────────────────────────────────────
+        if (savedIds.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+                AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.lg),
+            child: GestureDetector(
+              onTap: () {
+                ref.read(showSavedOnlyProvider.notifier).set(true);
+                context.go(Routes.discover);
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(AppRadius.lg),
+                  border: Border.all(color: AppColors.border),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.bookmark,
+                        size: 18, color: AppColors.navy),
+                    const SizedBox(width: AppSpacing.sm),
+                    Expanded(
+                      child: Text(
+                        '${savedIds.length} saved ${savedIds.length == 1 ? 'role' : 'roles'}',
+                        style: text.bodyMedium
+                            ?.copyWith(color: AppColors.textPrimary),
+                      ),
+                    ),
+                    Icon(Icons.chevron_right,
+                        size: 18, color: AppColors.stone),
+                  ],
+                ),
+              ),
             ),
           ),
 

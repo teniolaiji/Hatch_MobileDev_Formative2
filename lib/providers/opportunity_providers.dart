@@ -76,6 +76,17 @@ final selectedCategoryProvider =
       SelectedCategory.new,
     );
 
+/// Whether the Discover screen is filtering to saved-only.
+/// Lifted out of local state so the home screen can activate it before navigating.
+class ShowSavedOnlyNotifier extends Notifier<bool> {
+  @override
+  bool build() => false;
+  void set(bool value) => state = value;
+}
+
+final showSavedOnlyProvider =
+    NotifierProvider<ShowSavedOnlyNotifier, bool>(ShowSavedOnlyNotifier.new);
+
 final opportunitiesByCategoryProvider = Provider<List<Opportunity>>((ref) {
   final category = ref.watch(selectedCategoryProvider);
   final all = _valid(ref.watch(opportunitiesProvider).value ?? []);

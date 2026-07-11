@@ -19,7 +19,6 @@ class DiscoverScreen extends ConsumerStatefulWidget {
 
 class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
   final _search = TextEditingController();
-  bool _showSavedOnly = false;
 
   @override
   void dispose() {
@@ -47,6 +46,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
     final category = ref.watch(selectedCategoryProvider);
     final userSkills = ref.watch(currentUserProvider).value?.skills ?? [];
     final savedIds = ref.watch(savedOpportunityIdsProvider);
+    final showSavedOnly = ref.watch(showSavedOnlyProvider);
     final opportunitiesAsync = ref.watch(opportunitiesProvider);
 
     var results = (opportunitiesAsync.value ?? [])
@@ -63,11 +63,11 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
         return haystack.contains(query);
       }).toList();
     }
-    if (_showSavedOnly) {
+    if (showSavedOnly) {
       results = results.where((o) => savedIds.contains(o.id)).toList();
     }
 
-    final activeFilters = (category != null ? 1 : 0) + (_showSavedOnly ? 1 : 0);
+    final activeFilters = (category != null ? 1 : 0) + (showSavedOnly ? 1 : 0);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Discover')),
@@ -113,11 +113,12 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
                       ),
                     if (category != null && _showSavedOnly)
                       const SizedBox(width: AppSpacing.sm),
-                    if (_showSavedOnly)
+                    if (showSavedOnly)
                       _FilterPill(
                         label: 'Saved',
-                        onRemove: () =>
-                            setState(() => _showSavedOnly = false),
+                        onRemove: () => ref
+                            .read(showSavedOnlyProvider.notifier)
+                            .set(false),
                       ),
                   ],
                 ),
@@ -141,7 +142,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
-                                _showSavedOnly
+                                showSavedOnly
                                     ? 'No saved roles yet.\nTap the bookmark icon on any role to save it.'
                                     : (query.isEmpty && category == null
                                         ? 'No opportunities yet. Check back soon.'
@@ -184,15 +185,17 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
       ),
       // Saved filter toggle in FAB
       floatingActionButton: FloatingActionButton.small(
-        onPressed: () => setState(() => _showSavedOnly = !_showSavedOnly),
+        onPressed: () => ref
+            .read(showSavedOnlyProvider.notifier)
+            .set(!showSavedOnly),
         backgroundColor:
-            _showSavedOnly ? AppColors.navy : AppColors.surface,
+            showSavedOnly ? AppColors.navy : AppColors.surface,
         foregroundColor:
-            _showSavedOnly ? AppColors.cream : AppColors.stone,
+            showSavedOnly ? AppColors.cream : AppColors.stone,
         elevation: 2,
-        tooltip: _showSavedOnly ? 'Show all' : 'Show saved',
+        tooltip: showSavedOnly ? 'Show all' : 'Show saved',
         child: Icon(
-            _showSavedOnly ? Icons.bookmark : Icons.bookmark_border),
+            showSavedOnly ? Icons.bookmark : Icons.bookmark_border),
       ),
     );
   }
