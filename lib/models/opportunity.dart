@@ -16,6 +16,7 @@ class Opportunity {
     required this.timeCommitment,
     this.deadline,
     required this.category,
+    this.startupVerified = false,
   });
 
   final String id;
@@ -29,6 +30,7 @@ class Opportunity {
   final String timeCommitment;
   final DateTime? deadline;
   final OpportunityCategory category;
+  final bool startupVerified;
 
   Map<String, dynamic> toMap() => {
     'startupId': startupId,
@@ -41,6 +43,7 @@ class Opportunity {
     'timeCommitment': timeCommitment,
     'deadline': deadline?.toIso8601String(),
     'category': category.name,
+    'startupVerified': startupVerified,
   };
 
   factory Opportunity.fromMap(String id, Map<String, dynamic> map) =>
@@ -58,6 +61,7 @@ class Opportunity {
         timeCommitment: map['timeCommitment']?.toString() ?? '',
         deadline: map['deadline'] == null ? null : _parseDate(map['deadline']),
         category: _parseCategory(map['category']?.toString()),
+        startupVerified: map['startupVerified'] as bool? ?? false,
       );
 
   static DateTime _parseDate(dynamic value) {

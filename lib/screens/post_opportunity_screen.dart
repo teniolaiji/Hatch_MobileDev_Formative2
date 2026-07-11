@@ -78,6 +78,7 @@ class _PostOpportunityScreenState
               timeCommitment: _timeCtrl.text.trim(),
               deadline: _deadline,
               category: _category,
+              startupVerified: user.isVerified,
             ),
           )
           .timeout(const Duration(seconds: 15));
