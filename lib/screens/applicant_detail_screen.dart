@@ -11,19 +11,24 @@ import 'package:hatch/providers/user_providers.dart';
 import 'package:hatch/theme/app_colors.dart';
 import 'package:hatch/theme/app_spacing.dart';
 
-class ApplicantDetailScreen extends ConsumerWidget {
+class ApplicantDetailScreen extends ConsumerStatefulWidget {
   const ApplicantDetailScreen({super.key, required this.application});
   final Application application;
 
-  Future<void> _setStatus(
-      WidgetRef ref, BuildContext context, ApplicationStatus status) async {
+  @override
+  ConsumerState<ApplicantDetailScreen> createState() =>
+      _ApplicantDetailScreenState();
+}
+
+class _ApplicantDetailScreenState extends ConsumerState<ApplicantDetailScreen> {
+  Future<void> _setStatus(ApplicationStatus status) async {
     try {
       await ref
           .read(applicationRepositoryProvider)
-          .updateStatus(application.id, status);
-      if (context.mounted) context.pop();
+          .updateStatus(widget.application.id, status);
+      if (mounted) context.pop();
     } catch (e) {
-      if (context.mounted) {
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Could not update: $e')),
         );
@@ -32,24 +37,41 @@ class ApplicantDetailScreen extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  void initState() {
+    super.initState();
+    // Auto-advance submitted → reviewing the moment a founder opens this screen.
+    if (widget.application.status == ApplicationStatus.submitted) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref
+            .read(applicationRepositoryProvider)
+            .updateStatus(widget.application.id, ApplicationStatus.reviewing);
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
 
     // Profile is optional enrichment — the screen always shows the application
     // data from the Application object. If Firestore rules block cross-user
     // reads, we degrade silently rather than showing an error page.
-    final profileAsync = ref.watch(userByIdProvider(application.applicantId));
+    final profileAsync =
+        ref.watch(userByIdProvider(widget.application.applicantId));
     final user = profileAsync.value; // null while loading or on error
 
     // Watch live status so the badge and buttons reflect any real-time update.
     final live = ref
             .watch(startupApplicationsProvider)
             .value
-            ?.firstWhere((a) => a.id == application.id,
-                orElse: () => application) ??
-        application;
+            ?.firstWhere((a) => a.id == widget.application.id,
+                orElse: () => widget.application) ??
+        widget.application;
 
-    final isPending = live.status == ApplicationStatus.submitted;
+    // Show Accept/Reject for both submitted and reviewing — neither is a
+    // final decision yet. Only accepted/rejected hides the action bar.
+    final isPending = live.status == ApplicationStatus.submitted ||
+        live.status == ApplicationStatus.reviewing;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Applicant')),
@@ -61,9 +83,10 @@ class ApplicantDetailScreen extends ConsumerWidget {
             Center(
               child: Column(
                 children: [
-                  InitialsAvatar(name: application.applicantName),
+                  InitialsAvatar(name: widget.application.applicantName),
                   const SizedBox(height: AppSpacing.md),
-                  Text(application.applicantName, style: text.headlineMedium),
+                  Text(widget.application.applicantName,
+                      style: text.headlineMedium),
                   const SizedBox(height: AppSpacing.xs),
                   StatusBadge(status: live.status),
                 ],
@@ -74,12 +97,14 @@ class ApplicantDetailScreen extends ConsumerWidget {
             // ── Application ───────────────────────────────────────────────
             _Block(
               title: 'Applied for',
-              child: Text(application.opportunityTitle, style: text.bodyLarge),
+              child: Text(widget.application.opportunityTitle,
+                  style: text.bodyLarge),
             ),
-            if (application.message.isNotEmpty)
+            if (widget.application.message.isNotEmpty)
               _Block(
                 title: 'Their message',
-                child: Text(application.message, style: text.bodyLarge),
+                child:
+                    Text(widget.application.message, style: text.bodyLarge),
               ),
 
             // ── Full profile ──────────────────────────────────────────────
@@ -129,7 +154,7 @@ class ApplicantDetailScreen extends ConsumerWidget {
                   Expanded(
                     child: OutlinedButton(
                       onPressed: () =>
-                          _setStatus(ref, context, ApplicationStatus.rejected),
+                          _setStatus(ApplicationStatus.rejected),
                       child: const Text('Reject'),
                     ),
                   ),
@@ -137,7 +162,7 @@ class ApplicantDetailScreen extends ConsumerWidget {
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () =>
-                          _setStatus(ref, context, ApplicationStatus.accepted),
+                          _setStatus(ApplicationStatus.accepted),
                       child: const Text('Accept'),
                     ),
                   ),
