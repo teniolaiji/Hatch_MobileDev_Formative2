@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../components/verified_badge.dart';
+import '../models/app_user.dart';
 import '../models/application.dart';
 import '../models/opportunity.dart';
 import '../providers/application_providers.dart';
@@ -52,7 +53,8 @@ class _HomeBody extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final text = Theme.of(context).textTheme;
-    final userSkills = ref.watch(currentUserProvider).value?.skills ?? [];
+    final user = ref.watch(currentUserProvider).value;
+    final userSkills = user?.skills ?? [];
     final allApplications = ref.watch(myApplicationsProvider).value ?? [];
     final savedIds = ref.watch(savedOpportunityIdsProvider);
 
@@ -108,6 +110,9 @@ class _HomeBody extends ConsumerWidget {
             ),
           ),
         ),
+
+        // ── Profile completeness nudge ───────────────────────────────────
+        if (user != null) _ProfileNudge(user: user),
 
         // ── Best match ───────────────────────────────────────────────────
         Padding(
@@ -655,6 +660,119 @@ class _AppStatTile extends StatelessWidget {
     );
   }
 }
+
+// ── Profile completeness nudge ────────────────────────────────────────────────
+
+class _ProfileNudge extends StatelessWidget {
+  const _ProfileNudge({required this.user});
+  final AppUser user;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = Theme.of(context).textTheme;
+
+    final sections = [
+      (label: 'Bio', done: user.bio.isNotEmpty, route: Routes.editAbout),
+      (label: 'Skills', done: user.skills.isNotEmpty, route: Routes.editSkills),
+      (label: 'Interests', done: user.interests.isNotEmpty, route: Routes.editInterests),
+      (label: 'Experience', done: user.experience.isNotEmpty, route: Routes.editExperience),
+      (label: 'Education', done: user.education.isNotEmpty, route: Routes.editEducation),
+    ];
+
+    final completed = sections.where((s) => s.done).length;
+    final missing = sections.where((s) => !s.done).toList();
+
+    // Disappears once profile is complete
+    if (missing.isEmpty) return const SizedBox.shrink();
+
+    final progress = completed / sections.length;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+          AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.xl),
+      child: Container(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(AppRadius.lg),
+          border: Border.all(color: AppColors.border),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Complete your profile',
+                  style: text.titleSmall
+                      ?.copyWith(color: AppColors.textPrimary),
+                ),
+                Text(
+                  '$completed / ${sections.length}',
+                  style: text.labelSmall?.copyWith(color: AppColors.taupe),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.sm),
+
+            // Progress bar
+            ClipRRect(
+              borderRadius: BorderRadius.circular(2),
+              child: LinearProgressIndicator(
+                value: progress,
+                minHeight: 4,
+                backgroundColor: AppColors.border,
+                valueColor:
+                    const AlwaysStoppedAnimation<Color>(AppColors.navy),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.md),
+
+            // Tappable missing-section chips (max 3 shown)
+            Wrap(
+              spacing: AppSpacing.xs,
+              runSpacing: AppSpacing.xs,
+              children: missing.take(3).map((s) {
+                return GestureDetector(
+                  onTap: () => context.push(s.route),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.sm,
+                      vertical: AppSpacing.xs,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.navy.withValues(alpha: 0.06),
+                      borderRadius: BorderRadius.circular(AppRadius.xl),
+                      border: Border.all(
+                          color: AppColors.navy.withValues(alpha: 0.2)),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.add_rounded,
+                            size: 12, color: AppColors.navy),
+                        const SizedBox(width: 3),
+                        Text(
+                          'Add ${s.label}',
+                          style: text.labelSmall
+                              ?.copyWith(color: AppColors.navy),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 //  Error body
 
