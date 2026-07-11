@@ -34,64 +34,94 @@ class ApplicantDetailScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final text = Theme.of(context).textTheme;
-    final applicantAsync = ref.watch(userByIdProvider(application.applicantId));
+
+    // Profile is optional enrichment — the screen always shows the application
+    // data from the Application object. If Firestore rules block cross-user
+    // reads, we degrade silently rather than showing an error page.
+    final profileAsync = ref.watch(userByIdProvider(application.applicantId));
+    final user = profileAsync.value; // null while loading or on error
+
+    // Watch live status so the badge and buttons reflect any real-time update.
+    final live = ref
+            .watch(startupApplicationsProvider)
+            .value
+            ?.firstWhere((a) => a.id == application.id,
+                orElse: () => application) ??
+        application;
+
+    final isPending = live.status == ApplicationStatus.submitted;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Applicant')),
       body: SafeArea(
-        child: applicantAsync.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, _) => Center(
-              child: Text('Could not load this applicant.',
-                  style: text.bodyMedium)),
-          data: (user) => ListView(
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            children: [
-              // Identity
-              Center(
-                child: Column(
-                  children: [
-                    InitialsAvatar(name: user?.name ?? application.applicantName),
-                    const SizedBox(height: AppSpacing.md),
-                    Text(user?.name ?? application.applicantName,
-                        style: text.headlineMedium),
-                    const SizedBox(height: AppSpacing.xs),
-                    StatusBadge(status: application.status),
-                  ],
-                ),
+        child: ListView(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          children: [
+            // ── Identity ──────────────────────────────────────────────────
+            Center(
+              child: Column(
+                children: [
+                  InitialsAvatar(name: application.applicantName),
+                  const SizedBox(height: AppSpacing.md),
+                  Text(application.applicantName, style: text.headlineMedium),
+                  const SizedBox(height: AppSpacing.xs),
+                  StatusBadge(status: live.status),
+                ],
               ),
-              const SizedBox(height: AppSpacing.xl),
+            ),
+            const SizedBox(height: AppSpacing.xl),
 
-              // Their message for this role
+            // ── Application ───────────────────────────────────────────────
+            _Block(
+              title: 'Applied for',
+              child: Text(application.opportunityTitle, style: text.bodyLarge),
+            ),
+            if (application.message.isNotEmpty)
               _Block(
-                title: 'Applied for',
-                child: Text(application.opportunityTitle, style: text.bodyLarge),
+                title: 'Their message',
+                child: Text(application.message, style: text.bodyLarge),
               ),
-              if (application.message.isNotEmpty)
-                _Block(
-                  title: 'Their message',
-                  child: Text(application.message, style: text.bodyLarge),
-                ),
 
-              // Full profile
-              if (user != null) ...[
-                if (user.bio.isNotEmpty)
-                  _Block(title: 'About', child: Text(user.bio, style: text.bodyLarge)),
-                if (user.skills.isNotEmpty)
-                  _Block(title: 'Skills', child: _Chips(items: user.skills)),
-                if (user.interests.isNotEmpty)
-                  _Block(title: 'Interests', child: _Chips(items: user.interests)),
-                if (user.experience.isNotEmpty)
-                  _Block(title: 'Experience', child: _Entries(entries: user.experience)),
-                if (user.education.isNotEmpty)
-                  _Block(title: 'Education', child: _Entries(entries: user.education)),
-              ],
+            // ── Full profile ──────────────────────────────────────────────
+            if (profileAsync.isLoading)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: AppSpacing.xl),
+                child: Center(child: CircularProgressIndicator()),
+              )
+            else if (profileAsync.hasError)
+              Padding(
+                padding: const EdgeInsets.only(bottom: AppSpacing.xl),
+                child: Text(
+                  'Profile could not be loaded. Check your Firestore read rules.',
+                  style: text.bodySmall?.copyWith(color: AppColors.textSecondary),
+                ),
+              )
+            else if (user != null) ...[
+              if (user.bio.isNotEmpty)
+                _Block(
+                    title: 'About',
+                    child: Text(user.bio, style: text.bodyLarge)),
+              if (user.skills.isNotEmpty)
+                _Block(title: 'Skills', child: _Chips(items: user.skills)),
+              if (user.interests.isNotEmpty)
+                _Block(
+                    title: 'Interests', child: _Chips(items: user.interests)),
+              if (user.experience.isNotEmpty)
+                _Block(
+                    title: 'Experience',
+                    child: _Entries(entries: user.experience)),
+              if (user.education.isNotEmpty)
+                _Block(
+                    title: 'Education',
+                    child: _Entries(entries: user.education)),
             ],
-          ),
+
+            // Bottom padding so content clears the action bar
+            const SizedBox(height: AppSpacing.xxl),
+          ],
         ),
       ),
-      // Actions only while still pending.
-      bottomNavigationBar: application.status == ApplicationStatus.submitted
+      bottomNavigationBar: isPending
           ? Padding(
               padding: const EdgeInsets.all(AppSpacing.lg),
               child: Row(
