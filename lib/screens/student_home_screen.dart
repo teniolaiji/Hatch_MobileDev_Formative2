@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../components/status_badge.dart';
 import '../models/opportunity.dart';
 import '../providers/application_providers.dart';
 import '../providers/user_providers.dart';
@@ -156,8 +155,8 @@ class _HomeBody extends ConsumerWidget {
 
         const SizedBox(height: AppSpacing.lg),
 
-        // Application status tracker
-        _AppTracker(onSeeAll: () => context.go(Routes.applications)),
+        // Deadline countdown
+        const _DeadlineTracker(),
 
         const SizedBox(height: AppSpacing.xxl),
       ],
@@ -332,110 +331,136 @@ class _SkillIcon extends StatelessWidget {
   }
 }
 
-// ── Application status tracker ────────────────────────────────────────────────
+// ── Deadline countdown ────────────────────────────────────────────────────────
 
-class _AppTracker extends ConsumerWidget {
-  const _AppTracker({required this.onSeeAll});
-  final VoidCallback onSeeAll;
+class _DeadlineTracker extends ConsumerWidget {
+  const _DeadlineTracker();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final text = Theme.of(context).textTheme;
-    final appsAsync = ref.watch(myApplicationsProvider);
-    final recent = appsAsync.value?.take(3).toList() ?? [];
+    final all = ref.watch(opportunitiesProvider).value ?? [];
+    final appliedIds = ref
+            .watch(myApplicationsProvider)
+            .value
+            ?.map((a) => a.opportunityId)
+            .toSet() ??
+        {};
+
+    final now = DateTime.now();
+    final cutoff = now.add(const Duration(days: 14));
+
+    final closing = all
+        .where((o) =>
+            o.title.isNotEmpty &&
+            o.deadline != null &&
+            !appliedIds.contains(o.id) &&
+            o.deadline!.isAfter(now) &&
+            o.deadline!.isBefore(cutoff))
+        .toList()
+      ..sort((a, b) => a.deadline!.compareTo(b.deadline!));
+
+    if (closing.isEmpty) return const SizedBox.shrink();
+
+    final display = closing.take(3).toList();
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+      padding: const EdgeInsets.fromLTRB(
+          AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Section header
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'YOUR APPLICATIONS',
-                style: text.labelSmall?.copyWith(
-                  color: AppColors.navy,
-                  letterSpacing: 1.2,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              GestureDetector(
-                onTap: onSeeAll,
-                child: Text(
-                  'See all →',
-                  style: text.labelSmall?.copyWith(color: AppColors.taupe),
-                ),
-              ),
-            ],
+          Text(
+            'CLOSING SOON',
+            style: text.labelSmall?.copyWith(
+              color: AppColors.navy,
+              letterSpacing: 1.2,
+              fontWeight: FontWeight.w700,
+            ),
           ),
           const SizedBox(height: AppSpacing.sm),
-
-          // Card
           Container(
             decoration: BoxDecoration(
               color: AppColors.surface,
               borderRadius: BorderRadius.circular(AppRadius.lg),
               border: Border.all(color: AppColors.border),
             ),
-            child: recent.isEmpty
-                ? Padding(
-                    padding: const EdgeInsets.all(AppSpacing.md),
-                    child: Text(
-                      'No applications yet — find a role and apply.',
-                      style: text.bodyMedium
-                          ?.copyWith(color: AppColors.textSecondary),
-                    ),
-                  )
-                : Column(
-                    children: recent.asMap().entries.map((entry) {
-                      final i = entry.key;
-                      final app = entry.value;
-                      return Column(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: AppSpacing.md,
-                              vertical: AppSpacing.sm,
-                            ),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        app.opportunityTitle,
-                                        style: text.titleSmall?.copyWith(
-                                            color: AppColors.textPrimary),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                      if (app.startupName.isNotEmpty) ...[
-                                        const SizedBox(height: 2),
-                                        Text(
-                                          app.startupName,
-                                          style: text.bodySmall?.copyWith(
-                                              color: AppColors.stone),
-                                        ),
-                                      ],
-                                    ],
+            child: Column(
+              children: display.asMap().entries.map((entry) {
+                final i = entry.key;
+                final opp = entry.value;
+                final days = opp.deadline!.difference(now).inDays;
+                final label = days == 0
+                    ? 'Closes today'
+                    : days == 1
+                        ? '1 day left'
+                        : '$days days left';
+                final badgeColor = days <= 2
+                    ? AppColors.danger
+                    : days <= 6
+                        ? AppColors.ochre
+                        : AppColors.taupe;
+
+                return Column(
+                  children: [
+                    GestureDetector(
+                      onTap: () => context.push(
+                          Routes.opportunityDetail,
+                          extra: opp),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.md,
+                          vertical: AppSpacing.sm,
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    opp.title,
+                                    style: text.titleSmall?.copyWith(
+                                        color: AppColors.textPrimary),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                ),
-                                const SizedBox(width: AppSpacing.sm),
-                                StatusBadge(status: app.status),
-                              ],
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    opp.startupName,
+                                    style: text.bodySmall
+                                        ?.copyWith(color: AppColors.stone),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                          if (i < recent.length - 1)
-                            Divider(
-                                height: 1, color: AppColors.border),
-                        ],
-                      );
-                    }).toList(),
-                  ),
+                            const SizedBox(width: AppSpacing.sm),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: AppSpacing.sm,
+                                vertical: AppSpacing.xs,
+                              ),
+                              decoration: BoxDecoration(
+                                color: badgeColor.withValues(alpha: 0.12),
+                                borderRadius:
+                                    BorderRadius.circular(AppRadius.sm),
+                              ),
+                              child: Text(
+                                label,
+                                style: text.labelSmall
+                                    ?.copyWith(color: badgeColor),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    if (i < display.length - 1)
+                      Divider(height: 1, color: AppColors.border),
+                  ],
+                );
+              }).toList(),
+            ),
           ),
         ],
       ),
