@@ -36,7 +36,7 @@ class StudentHomeScreen extends ConsumerWidget {
 }
 
 
-class _HomeBody extends StatelessWidget {
+class _HomeBody extends ConsumerWidget {
   const _HomeBody({
     required this.firstName,
     required this.opportunities,
@@ -46,7 +46,7 @@ class _HomeBody extends StatelessWidget {
   final List<Opportunity> opportunities;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final text = Theme.of(context).textTheme;
     // Filter out corrupt docs (empty title = trailing-space field names in Firestore)
     final validOpportunities =
@@ -139,14 +139,22 @@ class _HomeBody extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: OpportunityCategory.values
-                .map((cat) => _CategoryTile(category: cat))
+                .map((cat) => _CategoryTile(
+                      category: cat,
+                      onTap: () {
+                        ref
+                            .read(selectedCategoryProvider.notifier)
+                            .set(cat);
+                        context.go(Routes.discover);
+                      },
+                    ))
                 .toList(),
           ),
         ),
 
         const SizedBox(height: AppSpacing.lg),
 
-        // Applications shortcut 
+        // Applications shortcut
         Padding(
           padding: const EdgeInsets.fromLTRB(
               AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.xxl),
@@ -162,8 +170,9 @@ class _HomeBody extends StatelessWidget {
 
 //  Category tile 
 class _CategoryTile extends StatelessWidget {
-  const _CategoryTile({required this.category});
+  const _CategoryTile({required this.category, required this.onTap});
   final OpportunityCategory category;
+  final VoidCallback onTap;
 
   IconData get _icon => switch (category) {
         OpportunityCategory.engineering => Icons.code_rounded,
@@ -177,7 +186,7 @@ class _CategoryTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
     return GestureDetector(
-      onTap: () => context.go(Routes.discover),
+      onTap: onTap,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

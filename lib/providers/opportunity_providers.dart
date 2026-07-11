@@ -39,9 +39,15 @@ final searchQueryProvider = NotifierProvider<SearchQueryNotifier, String>(
 
 final filteredOpportunitiesProvider = Provider<List<Opportunity>>((ref) {
   final query = ref.watch(searchQueryProvider).trim().toLowerCase();
+  final category = ref.watch(selectedCategoryProvider);
   final all = _valid(ref.watch(opportunitiesProvider).value ?? []);
-  if (query.isEmpty) return all;
-  return all.where((o) {
+
+  var results = category != null
+      ? all.where((o) => o.category == category).toList()
+      : all;
+
+  if (query.isEmpty) return results;
+  return results.where((o) {
     final haystack = [
       o.title,
       o.startupName,
