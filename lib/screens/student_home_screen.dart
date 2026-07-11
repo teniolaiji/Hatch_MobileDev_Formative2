@@ -202,23 +202,22 @@ class _HomeBody extends ConsumerWidget {
                 padding: const EdgeInsets.symmetric(
                     horizontal: AppSpacing.md, vertical: AppSpacing.sm),
                 decoration: BoxDecoration(
-                  color: AppColors.surface,
+                  color: AppColors.navy,
                   borderRadius: BorderRadius.circular(AppRadius.lg),
-                  border: Border.all(color: AppColors.border),
                 ),
                 child: Row(
                   children: [
                     const Icon(Icons.bookmark,
-                        size: 18, color: AppColors.navy),
+                        size: 18, color: AppColors.ochre),
                     const SizedBox(width: AppSpacing.sm),
                     Expanded(
                       child: Text(
                         '${savedIds.length} saved ${savedIds.length == 1 ? 'role' : 'roles'}',
                         style: text.bodyMedium
-                            ?.copyWith(color: AppColors.textPrimary),
+                            ?.copyWith(color: AppColors.cream),
                       ),
                     ),
-                    Icon(Icons.chevron_right,
+                    const Icon(Icons.chevron_right,
                         size: 18, color: AppColors.stone),
                   ],
                 ),
