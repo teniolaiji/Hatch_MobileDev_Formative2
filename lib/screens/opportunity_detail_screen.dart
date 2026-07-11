@@ -33,6 +33,8 @@ class OpportunityDetailScreen extends ConsumerWidget {
     final isStudent = user?.role == UserRole.student;
     final isSaved =
         ref.watch(savedOpportunityIdsProvider).contains(opportunity.id);
+    final userSkillSet =
+        (user?.skills ?? []).map((s) => s.toLowerCase()).toSet();
 
     return Scaffold(
       appBar: AppBar(
@@ -106,30 +108,9 @@ class OpportunityDetailScreen extends ConsumerWidget {
 
             if (opportunity.requiredSkills.isNotEmpty) ...[
               const SizedBox(height: AppSpacing.xl),
-              Text('Skills needed', style: text.titleMedium),
-              const SizedBox(height: AppSpacing.md),
-              Wrap(
-                spacing: AppSpacing.sm,
-                runSpacing: AppSpacing.sm,
-                children: opportunity.requiredSkills
-                    .map((s) => Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: AppSpacing.sm,
-                            vertical: AppSpacing.xs,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppColors.navy,
-                            borderRadius: BorderRadius.circular(AppRadius.xl),
-                          ),
-                          child: Text(
-                            s,
-                            style: Theme.of(context)
-                                .textTheme
-                                .labelSmall
-                                ?.copyWith(color: AppColors.stone),
-                          ),
-                        ))
-                    .toList(),
+              _SkillsSection(
+                skills: opportunity.requiredSkills,
+                userSkillSet: isStudent ? userSkillSet : null,
               ),
             ],
           ],
@@ -254,6 +235,171 @@ class _ApplyButtonState extends ConsumerState<_ApplyButton> {
     );
   }
 }
+
+// ── Skill gap section ─────────────────────────────────────────────────────────
+
+class _SkillsSection extends StatelessWidget {
+  const _SkillsSection({
+    required this.skills,
+    required this.userSkillSet,
+  });
+
+  /// Required skills for this opportunity.
+  final List<String> skills;
+
+  /// The current student's skills (lowercased). Null means non-student viewer —
+  /// show all chips in the default navy style with no gap hints.
+  final Set<String>? userSkillSet;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = Theme.of(context).textTheme;
+    final knownSkills = userSkillSet;
+
+    final matched = knownSkills == null
+        ? 0
+        : skills.where((s) => knownSkills.contains(s.toLowerCase())).length;
+    final total = skills.length;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Header row: label + match summary (students only)
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text('Skills needed', style: text.titleMedium),
+            if (knownSkills != null)
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.sm,
+                  vertical: 2,
+                ),
+                decoration: BoxDecoration(
+                  color: matched == total
+                      ? AppColors.green.withValues(alpha: 0.12)
+                      : AppColors.surface,
+                  borderRadius: BorderRadius.circular(AppRadius.xl),
+                  border: Border.all(
+                    color: matched == total
+                        ? AppColors.green.withValues(alpha: 0.4)
+                        : AppColors.border,
+                  ),
+                ),
+                child: Text(
+                  '$matched / $total matched',
+                  style: text.labelSmall?.copyWith(
+                    color: matched == total
+                        ? AppColors.green
+                        : AppColors.taupe,
+                  ),
+                ),
+              ),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.md),
+
+        // Skill chips
+        Wrap(
+          spacing: AppSpacing.sm,
+          runSpacing: AppSpacing.sm,
+          children: skills.map((s) {
+            final have = knownSkills?.contains(s.toLowerCase()) ?? false;
+            // When no userSkillSet (non-student), render default navy chip
+            if (knownSkills == null) {
+              return _SkillChip(label: s, state: _ChipState.neutral);
+            }
+            return _SkillChip(
+              label: s,
+              state: have ? _ChipState.matched : _ChipState.missing,
+            );
+          }).toList(),
+        ),
+
+        // Gap hint (students only, when there are missing skills)
+        if (knownSkills != null && matched < total) ...[
+          const SizedBox(height: AppSpacing.md),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Icon(Icons.info_outline,
+                  size: 14, color: AppColors.taupe),
+              const SizedBox(width: AppSpacing.xs),
+              Expanded(
+                child: Text(
+                  'Skills you don\'t have yet are shown in outline. '
+                  'Consider adding them to your profile as you learn.',
+                  style: text.bodySmall?.copyWith(color: AppColors.taupe),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+enum _ChipState { matched, missing, neutral }
+
+class _SkillChip extends StatelessWidget {
+  const _SkillChip({required this.label, required this.state});
+  final String label;
+  final _ChipState state;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = Theme.of(context).textTheme;
+
+    final (bg, border, fg, icon) = switch (state) {
+      _ChipState.matched => (
+          AppColors.green.withValues(alpha: 0.12),
+          AppColors.green.withValues(alpha: 0.4),
+          AppColors.green,
+          Icons.check_rounded,
+        ),
+      _ChipState.missing => (
+          Colors.transparent,
+          AppColors.border,
+          AppColors.stone,
+          null,
+        ),
+      _ChipState.neutral => (
+          AppColors.navy,
+          Colors.transparent,
+          AppColors.stone,
+          null,
+        ),
+    };
+
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: AppSpacing.xs,
+      ),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(AppRadius.xl),
+        border: Border.all(color: border),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (icon != null) ...[
+            Icon(icon, size: 12, color: fg),
+            const SizedBox(width: 3),
+          ],
+          Text(
+            label,
+            style: text.labelSmall?.copyWith(color: fg),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 class _InfoRow extends StatelessWidget {
   const _InfoRow({
