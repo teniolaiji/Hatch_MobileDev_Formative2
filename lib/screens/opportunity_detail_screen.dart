@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hatch/components/verified_badge.dart';
 import 'package:hatch/models/opportunity.dart';
 import 'package:hatch/theme/app_colors.dart';
 import 'package:hatch/theme/app_spacing.dart';
@@ -22,7 +23,13 @@ class OpportunityDetailScreen extends ConsumerWidget {
         child: ListView(
           padding: const EdgeInsets.all(AppSpacing.lg),
           children: [
-            Text(opportunity.startupName, style: text.labelLarge),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(opportunity.startupName, style: text.labelLarge),
+                VerifiedBadge(show: opportunity.startupVerified),
+              ],
+            ),
             const SizedBox(height: AppSpacing.xs),
             Text(opportunity.title, style: text.displayMedium),
             const SizedBox(height: AppSpacing.lg),

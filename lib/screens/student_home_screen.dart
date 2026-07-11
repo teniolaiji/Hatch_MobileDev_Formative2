@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../components/verified_badge.dart';
 import '../models/opportunity.dart';
 import '../providers/application_providers.dart';
 import '../providers/user_providers.dart';
@@ -249,12 +250,22 @@ class _TopMatchCard extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child: Text(
-                    opportunity.startupName.toUpperCase(),
-                    style: text.labelSmall?.copyWith(
-                      color: AppColors.ochre,
-                      letterSpacing: 0.8,
-                    ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Flexible(
+                        child: Text(
+                          opportunity.startupName.toUpperCase(),
+                          style: text.labelSmall?.copyWith(
+                            color: AppColors.ochre,
+                            letterSpacing: 0.8,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      VerifiedBadge(
+                          show: opportunity.startupVerified, onDark: true),
+                    ],
                   ),
                 ),
                 if (score != null) ...[

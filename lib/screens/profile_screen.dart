@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hatch/components/initials_avatar.dart';
+import 'package:hatch/components/verified_badge.dart';
 import 'package:hatch/data/auth_repository.dart';
 import 'package:hatch/models/app_user.dart';
 import 'package:hatch/models/profile_entry.dart';
@@ -37,16 +38,42 @@ class ProfileScreen extends ConsumerWidget {
                   const SizedBox(height: AppSpacing.xs),
                   Text(user?.email ?? '', style: text.bodyMedium),
                   const SizedBox(height: AppSpacing.sm),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
-                    decoration: BoxDecoration(
-                      color: AppColors.highlight.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(AppRadius.sm),
-                    ),
-                    child: Text(isStudent ? 'Student' : 'Founder',
-                        style: text.labelSmall
-                            ?.copyWith(color: AppColors.highlight)),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: AppSpacing.sm,
+                            vertical: AppSpacing.xs),
+                        decoration: BoxDecoration(
+                          color: AppColors.highlight.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(AppRadius.sm),
+                        ),
+                        child: Text(isStudent ? 'Student' : 'Founder',
+                            style: text.labelSmall
+                                ?.copyWith(color: AppColors.highlight)),
+                      ),
+                      // Founders only: verified status
+                      if (!isStudent)
+                        Padding(
+                          padding: const EdgeInsets.only(left: AppSpacing.sm),
+                          child: user?.isVerified == true
+                              ? Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons.verified_rounded,
+                                        size: 14, color: AppColors.green),
+                                    const SizedBox(width: 4),
+                                    Text('Verified',
+                                        style: text.labelSmall?.copyWith(
+                                            color: AppColors.green)),
+                                  ],
+                                )
+                              : Text('Not yet verified',
+                                  style: text.labelSmall?.copyWith(
+                                      color: AppColors.textSecondary)),
+                        ),
+                    ],
                   ),
                 ],
               ),
