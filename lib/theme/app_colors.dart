@@ -7,6 +7,7 @@ class AppColors {
   static const Color navy = Color(0xFF1B2A41);
   static const Color red = Color(0xFFC5283D);
   static const Color ochre = Color(0xFFC99B5A);
+  static const Color green = Color(0xFF2D9E6B);
   static const Color cream = Color(0xFFF8F4ED);
   static const Color paper = Color(0xFFFFFDF9);
   static const Color sand = Color(0xFFE7DFD2);

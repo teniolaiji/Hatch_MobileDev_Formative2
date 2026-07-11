@@ -58,7 +58,7 @@ class ApplicationsScreen extends ConsumerWidget {
                                 style: text.titleMedium
                                     ?.copyWith(color: AppColors.cream)),
                             const SizedBox(height: AppSpacing.xs),
-                            Text(app.startupId,
+                            Text(app.startupName,
                                 style: text.bodyMedium
                                     ?.copyWith(color: AppColors.stone)),
                           ],

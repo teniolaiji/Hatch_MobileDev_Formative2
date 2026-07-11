@@ -148,6 +148,7 @@ class _ApplyButtonState extends ConsumerState<_ApplyButton> {
           opportunityId: widget.opportunity.id,
           opportunityTitle: widget.opportunity.title,
           startupId: widget.opportunity.startupId,
+          startupName: widget.opportunity.startupName,
           applicantId: user.uid,
           applicantName: user.name,
           message: message,

@@ -13,7 +13,7 @@ class StatusBadge extends StatelessWidget {
     final (label, color) = switch (status) {
       ApplicationStatus.submitted => ('Submitted', AppColors.ochre),
       ApplicationStatus.reviewing => ('Reviewing', AppColors.ochre),
-      ApplicationStatus.accepted => ('Accepted', AppColors.primary),
+      ApplicationStatus.accepted => ('Accepted', AppColors.green),
       ApplicationStatus.rejected => ('Rejected', AppColors.danger),
     };
 

@@ -8,6 +8,7 @@ class Application {
     required this.opportunityId,
     required this.opportunityTitle,
     required this.startupId,
+    required this.startupName,
     required this.applicantId,
     required this.applicantName,
     required this.message,
@@ -19,6 +20,7 @@ class Application {
   final String opportunityId;
   final String opportunityTitle;
   final String startupId;
+  final String startupName;
   final String applicantId;
   final String applicantName;
   final String message;
@@ -29,6 +31,7 @@ class Application {
         'opportunityId': opportunityId,
         'opportunityTitle': opportunityTitle,
         'startupId': startupId,
+        'startupName': startupName,
         'applicantId': applicantId,
         'applicantName': applicantName,
         'message': message,
@@ -42,6 +45,7 @@ class Application {
         opportunityId: map['opportunityId'] as String? ?? '',
         opportunityTitle: map['opportunityTitle'] as String? ?? '',
         startupId: map['startupId'] as String? ?? '',
+        startupName: map['startupName'] as String? ?? '',
         applicantId: map['applicantId'] as String? ?? '',
         applicantName: map['applicantName'] as String? ?? '',
         message: map['message'] as String? ?? '',
