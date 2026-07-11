@@ -1,3 +1,5 @@
+import 'package:hatch/models/profile_entry.dart';
+
 enum UserRole { student, founder }
 
 class AppUser {
@@ -9,8 +11,8 @@ class AppUser {
     this.skills = const [],
     this.bio = '',
     this.interests = const [],
-    this.experience = '',
-    this.education = '',
+    this.experience = const [],
+    this.education = const [],
   });
 
   final String uid;
@@ -20,9 +22,8 @@ class AppUser {
   final List<String> skills;
   final String bio;
   final List<String> interests;
-  final String experience;
-  final String education;
-
+  final List<ProfileEntry> experience;
+  final List<ProfileEntry> education;
   Map<String, dynamic> toMap() => {
     'uid': uid,
     'email': email,
@@ -31,8 +32,8 @@ class AppUser {
     'skills': skills,
     'bio': bio,
     'interests': interests,
-    'experience': experience,
-    'education': education,
+    'experience': experience.map((e) => e.toMap()).toList(),
+    'education': education.map((e) => e.toMap()).toList(),
   };
 
   factory AppUser.fromMap(Map<String, dynamic> map) => AppUser(
@@ -43,7 +44,11 @@ class AppUser {
     skills: List<String>.from(map['skills'] as List? ?? []),
     bio: map['bio'] as String? ?? '',
     interests: List<String>.from(map['interests'] as List? ?? []),
-    experience: map['experience'] as String? ?? '',
-    education: map['education'] as String? ?? '',
+    experience: (map['experience'] as List? ?? [])
+        .map((e) => ProfileEntry.fromMap(e as Map<String, dynamic>))
+        .toList(),
+    education: (map['education'] as List? ?? [])
+        .map((e) => ProfileEntry.fromMap(e as Map<String, dynamic>))
+        .toList(),
   );
 }
