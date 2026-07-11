@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hatch/providers/user_providers.dart';
 import 'package:hatch/theme/app_spacing.dart';
 
-/// Reusable chip-based editor for any List<String> profile field.
-/// Use for skills, interests, or any future tag-style field.
+// Reusable chip-based editor for any List<String> profile field
+
 class EditTagsScreen extends ConsumerStatefulWidget {
   const EditTagsScreen({
     super.key,

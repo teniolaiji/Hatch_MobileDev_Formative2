@@ -16,6 +16,7 @@ class UserRepository {
     final doc = await _users.doc(uid).get();
     if (!doc.exists) return null;
     return AppUser.fromMap(doc.data()!);
+    
   }
 
   Future<void> updateSkills(String uid, List<String> skills) {

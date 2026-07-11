@@ -13,3 +13,10 @@ final currentUserProvider = FutureProvider<AppUser?>((ref) async {
   if (authUser == null) return null;
   return ref.watch(userRepositoryProvider).fetchUser(authUser.uid);
 });
+
+final userByIdProvider = FutureProvider.family<AppUser?, String>((
+  ref,
+  uid,
+) async {
+  return ref.watch(userRepositoryProvider).fetchUser(uid);
+});
