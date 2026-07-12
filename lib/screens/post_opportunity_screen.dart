@@ -9,7 +9,9 @@ import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
 
 class PostOpportunityScreen extends ConsumerStatefulWidget {
-  const PostOpportunityScreen({super.key});
+  const PostOpportunityScreen({super.key, this.existing});
+  /// When non-null, the form pre-fills with this opportunity and saves as an update.
+  final Opportunity? existing;
 
   @override
   ConsumerState<PostOpportunityScreen> createState() =>
@@ -29,6 +31,23 @@ class _PostOpportunityScreenState
   final List<String> _skills = [];
   DateTime? _deadline;
   bool _submitting = false;
+
+  bool get _isEditing => widget.existing != null;
+
+  @override
+  void initState() {
+    super.initState();
+    final e = widget.existing;
+    if (e != null) {
+      _titleCtrl.text = e.title;
+      _descCtrl.text = e.description;
+      _timeCtrl.text = e.timeCommitment;
+      _category = e.category;
+      _location = e.location;
+      _skills.addAll(e.requiredSkills);
+      _deadline = e.deadline;
+    }
+  }
 
   @override
   void dispose() {
@@ -63,25 +82,43 @@ class _PostOpportunityScreenState
 
     setState(() => _submitting = true);
     try {
-      await ref
-          .read(opportunityRepositoryProvider)
-          .create(
-            Opportunity(
-              id: '',
-              startupId: user.uid,
-              startupName: user.name,
-              title: _titleCtrl.text.trim(),
-              description: _descCtrl.text.trim(),
-              requiredSkills: List.from(_skills),
-              createdAt: DateTime.now(),
-              location: _location,
-              timeCommitment: _timeCtrl.text.trim(),
-              deadline: _deadline,
-              category: _category,
-              startupVerified: user.isVerified,
-            ),
-          )
-          .timeout(const Duration(seconds: 15));
+      final repo = ref.read(opportunityRepositoryProvider);
+      if (_isEditing) {
+        final updated = Opportunity(
+          id: widget.existing!.id,
+          startupId: widget.existing!.startupId,
+          startupName: widget.existing!.startupName,
+          title: _titleCtrl.text.trim(),
+          description: _descCtrl.text.trim(),
+          requiredSkills: List.from(_skills),
+          createdAt: widget.existing!.createdAt,
+          location: _location,
+          timeCommitment: _timeCtrl.text.trim(),
+          deadline: _deadline,
+          category: _category,
+          startupVerified: widget.existing!.startupVerified,
+        );
+        await repo.update(updated).timeout(const Duration(seconds: 15));
+      } else {
+        await repo
+            .create(
+              Opportunity(
+                id: '',
+                startupId: user.uid,
+                startupName: user.name,
+                title: _titleCtrl.text.trim(),
+                description: _descCtrl.text.trim(),
+                requiredSkills: List.from(_skills),
+                createdAt: DateTime.now(),
+                location: _location,
+                timeCommitment: _timeCtrl.text.trim(),
+                deadline: _deadline,
+                category: _category,
+                startupVerified: user.isVerified,
+              ),
+            )
+            .timeout(const Duration(seconds: 15));
+      }
       if (mounted) context.pop();
     } on TimeoutException {
       if (mounted) {
@@ -109,7 +146,7 @@ class _PostOpportunityScreenState
     final text = Theme.of(context).textTheme;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Post a role')),
+      appBar: AppBar(title: Text(_isEditing ? 'Edit role' : 'Post a role')),
       body: Form(
         key: _formKey,
         child: ListView(
@@ -318,7 +355,7 @@ class _PostOpportunityScreenState
                       width: 20,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : const Text('Post role'),
+                  : Text(_isEditing ? 'Save changes' : 'Post role'),
             ),
             const SizedBox(height: AppSpacing.lg),
           ],

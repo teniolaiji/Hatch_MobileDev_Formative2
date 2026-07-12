@@ -4,6 +4,8 @@ import 'package:hatch/models/opportunity.dart';
 import 'package:hatch/theme/app_colors.dart';
 import 'package:hatch/theme/app_spacing.dart';
 
+enum _CardAction { edit, delete }
+
 class _SkillPill extends StatelessWidget {
   const _SkillPill({required this.skill});
   final String skill;
@@ -40,6 +42,8 @@ class OpportunityCard extends StatelessWidget {
     this.isSaved = false,
     this.onToggleSave,
     this.showExpired = false,
+    this.onEdit,
+    this.onDelete,
   });
 
   final Opportunity opportunity;
@@ -50,6 +54,9 @@ class OpportunityCard extends StatelessWidget {
   /// When true the card is visually muted and shows a "Closed" badge.
   /// Callers opt in — students never see expired cards; founders do.
   final bool showExpired;
+  /// When provided, a ⋮ popup menu appears with Edit and/or Delete actions.
+  final VoidCallback? onEdit;
+  final VoidCallback? onDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -129,6 +136,49 @@ class OpportunityCard extends StatelessWidget {
                         isSaved ? Icons.bookmark : Icons.bookmark_border,
                         size: 20,
                         color: isSaved ? AppColors.navy : AppColors.stone,
+                      ),
+                    ),
+                  ],
+                  if (onEdit != null || onDelete != null) ...[
+                    const SizedBox(width: AppSpacing.xs),
+                    SizedBox(
+                      height: 24,
+                      width: 24,
+                      child: PopupMenuButton<_CardAction>(
+                        padding: EdgeInsets.zero,
+                        icon: const Icon(Icons.more_vert,
+                            size: 18, color: AppColors.stone),
+                        onSelected: (action) {
+                          if (action == _CardAction.edit) onEdit?.call();
+                          if (action == _CardAction.delete) onDelete?.call();
+                        },
+                        itemBuilder: (_) => [
+                          if (onEdit != null)
+                            const PopupMenuItem(
+                              value: _CardAction.edit,
+                              child: Row(
+                                children: [
+                                  Icon(Icons.edit_outlined, size: 16),
+                                  SizedBox(width: 8),
+                                  Text('Edit'),
+                                ],
+                              ),
+                            ),
+                          if (onDelete != null)
+                            const PopupMenuItem(
+                              value: _CardAction.delete,
+                              child: Row(
+                                children: [
+                                  Icon(Icons.delete_outline,
+                                      size: 16, color: AppColors.danger),
+                                  SizedBox(width: 8),
+                                  Text('Delete',
+                                      style: TextStyle(
+                                          color: AppColors.danger)),
+                                ],
+                              ),
+                            ),
+                        ],
                       ),
                     ),
                   ],

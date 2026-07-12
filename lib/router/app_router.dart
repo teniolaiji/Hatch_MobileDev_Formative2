@@ -59,6 +59,7 @@ class Routes {
   static const editAlu = '/profile/alu';
   static const apply = '/apply';
   static const myApplicationDetail = '/student/application';
+  static const editOpportunity = '/founder/edit-opportunity';
   // Applicant detail
   static const applicantDetail = '/applicant';
 }
@@ -171,6 +172,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: Routes.applicantDetail,
         builder: (c, s) =>
             ApplicantDetailScreen(application: s.extra as Application),
+      ),
+      GoRoute(
+        path: Routes.editOpportunity,
+        builder: (_, state) =>
+            PostOpportunityScreen(existing: state.extra as Opportunity),
       ),
       // ── Student shell ─────────────────────────────────────────────────────
       StatefulShellRoute.indexedStack(

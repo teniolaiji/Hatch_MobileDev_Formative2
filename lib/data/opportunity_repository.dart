@@ -35,4 +35,12 @@ class OpportunityRepository {
     final doc = _opportunities.doc();
     await doc.set(opportunity.toMap());
   }
+
+  Future<void> update(Opportunity opportunity) {
+    return _opportunities.doc(opportunity.id).update(opportunity.toMap());
+  }
+
+  Future<void> delete(String id) {
+    return _opportunities.doc(id).delete();
+  }
 }
