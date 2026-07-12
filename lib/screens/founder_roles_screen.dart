@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hatch/components/opportunity_card.dart';
 import 'package:hatch/models/opportunity.dart';
+import 'package:hatch/providers/application_providers.dart';
 import 'package:hatch/providers/opportunity_providers.dart';
 import 'package:hatch/providers/user_providers.dart';
 import 'package:hatch/router/app_router.dart';
@@ -111,6 +112,14 @@ class _FounderRolesScreenState extends ConsumerState<FounderRolesScreen> {
     final isVerified =
         ref.watch(currentUserProvider).value?.isVerified ?? false;
 
+    // Build opportunityId → applicant count map from the already-streamed list.
+    final applicationsSnap = ref.watch(startupApplicationsProvider);
+    final countByRole = <String, int>{};
+    for (final app in applicationsSnap.value ?? []) {
+      countByRole[app.opportunityId] =
+          (countByRole[app.opportunityId] ?? 0) + 1;
+    }
+
     return Scaffold(
       appBar: AppBar(title: const Text('My roles')),
       floatingActionButton: FloatingActionButton.extended(
@@ -153,6 +162,7 @@ class _FounderRolesScreenState extends ConsumerState<FounderRolesScreen> {
               itemBuilder: (context, i) => OpportunityCard(
                 opportunity: roles[i],
                 showExpired: true,
+                applicantCount: countByRole[roles[i].id] ?? 0,
                 onTap: () =>
                     context.push(Routes.opportunityDetail, extra: roles[i]),
                 onEdit: () => context.push(

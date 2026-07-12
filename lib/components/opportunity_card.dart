@@ -44,6 +44,7 @@ class OpportunityCard extends StatelessWidget {
     this.showExpired = false,
     this.onEdit,
     this.onDelete,
+    this.applicantCount,
   });
 
   final Opportunity opportunity;
@@ -57,6 +58,8 @@ class OpportunityCard extends StatelessWidget {
   /// When provided, a ⋮ popup menu appears with Edit and/or Delete actions.
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
+  /// When provided, shows an applicant count footer. Founders only.
+  final int? applicantCount;
 
   @override
   Widget build(BuildContext context) {
@@ -202,6 +205,30 @@ class OpportunityCard extends StatelessWidget {
                       .take(4)
                       .map((s) => _SkillPill(skill: s))
                       .toList(),
+                ),
+              ],
+              if (applicantCount != null) ...[
+                const SizedBox(height: AppSpacing.md),
+                const Divider(height: 1),
+                const SizedBox(height: AppSpacing.sm),
+                Row(
+                  children: [
+                    Icon(Icons.people_outline_rounded,
+                        size: 14, color: AppColors.stone),
+                    const SizedBox(width: 4),
+                    Text(
+                      applicantCount == 0
+                          ? 'No applicants yet'
+                          : applicantCount == 1
+                              ? '1 applicant'
+                              : '$applicantCount applicants',
+                      style: text.labelSmall?.copyWith(
+                        color: applicantCount! > 0
+                            ? AppColors.taupe
+                            : AppColors.stone,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ],
