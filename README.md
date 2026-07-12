@@ -45,38 +45,86 @@ A Flutter mobile app that connects ALU students with startup roles posted by ver
 
 ```
 lib/
-├── data/                     # Repositories (Firestore access only)
+├── main.dart
+├── firebase_options.dart
+│
+├── data/                          # Repositories — all Firestore access lives here
 │   ├── application_repository.dart
+│   ├── auth_repository.dart
 │   ├── opportunity_repository.dart
+│   ├── startup_repository.dart
 │   └── user_repository.dart
-├── models/                   # Immutable data models
+│
+├── models/                        # Immutable data models with toMap / fromMap
 │   ├── app_user.dart
 │   ├── application.dart
 │   ├── meeting.dart
-│   └── opportunity.dart
-├── providers/                # Riverpod providers
+│   ├── opportunity.dart
+│   ├── profile_entry.dart
+│   └── startup.dart
+│
+├── providers/                     # Riverpod providers (StreamProvider / NotifierProvider)
 │   ├── application_providers.dart
+│   ├── auth_providers.dart
 │   ├── opportunity_providers.dart
+│   ├── startup_providers.dart
 │   └── user_providers.dart
+│
 ├── router/
-│   └── app_router.dart       # GoRouter config + redirects
-├── screens/                  # One file per screen
-│   ├── applicant_detail_screen.dart
-│   ├── applications_screen.dart
-│   ├── auth_screen.dart
-│   ├── founder_roles_screen.dart
-│   ├── home_screen.dart
-│   ├── opportunity_detail_screen.dart
-│   ├── post_opportunity_screen.dart
-│   ├── profile_screen.dart
-│   └── student_application_detail_screen.dart
-├── components/               # Reusable widgets
+│   └── app_router.dart            # GoRouter config, route constants, role-based redirects
+│
+├── screens/
+│   │
+│   ├── # ── Auth ──────────────────────────────────────────────
+│   ├── welcome_screen.dart        # Landing / splash
+│   ├── login_screen.dart
+│   ├── signup_screen.dart
+│   ├── role_selection_screen.dart # Student vs Founder picker on first sign-up
+│   │
+│   ├── # ── Student shell ─────────────────────────────────────
+│   ├── student_shell.dart         # StatefulShellRoute — bottom nav for students
+│   ├── student_home_screen.dart   # Tab: Discover feed with match scores & filters
+│   ├── home_screen.dart           # Opportunity feed / hero screen
+│   ├── discover_screen.dart       # Filtered browse view
+│   ├── opportunity_detail_screen.dart  # Role detail + skill-gap + apply CTA
+│   ├── apply_screen.dart          # Application form
+│   ├── applications_screen.dart   # My applications (grouped by status)
+│   ├── student_application_detail_screen.dart  # Detail + withdraw + meetings
+│   │
+│   ├── # ── Founder shell ─────────────────────────────────────
+│   ├── founder_shell.dart         # StatefulShellRoute — bottom nav for founders
+│   ├── founder_home_screen.dart   # Founder dashboard / overview
+│   ├── founder_roles_screen.dart  # Posted roles list with applicant count badges
+│   ├── post_opportunity_screen.dart  # Create & edit role (dual-purpose)
+│   ├── founder_applicants_screen.dart  # Applicant list for a role
+│   ├── applicant_detail_screen.dart    # Review, accept/reject, schedule meeting
+│   │
+│   └── # ── Shared / Profile ──────────────────────────────────
+│       ├── profile_screen.dart         # Profile overview + completeness nudge
+│       ├── edit_about_screen.dart      # Edit bio, skills, interests
+│       ├── edit_tags_screen.dart       # Edit skill / interest tags
+│       ├── edit_entries_screen.dart    # Edit experience / education entries
+│       ├── edit_alu_screen.dart        # Edit ALU campus, program, year
+│       └── edit_startup_screen.dart    # Edit startup profile (founders)
+│
+├── components/                    # Reusable widgets
+│   ├── app_text_field.dart
+│   ├── category_row.dart
+│   ├── initials_avatar.dart
 │   ├── opportunity_card.dart
 │   ├── status_badge.dart
 │   └── verified_badge.dart
-└── theme/
-    ├── app_colors.dart
-    └── app_spacing.dart
+│
+├── theme/
+│   ├── app_colors.dart
+│   ├── app_spacing.dart
+│   ├── app_theme.dart
+│   └── app_typography.dart
+│
+└── utils/
+    ├── greeting.dart              # Time-based greeting helper
+    ├── match_score.dart           # Skill match % computation
+    └── matching.dart              # Set-diff skill gap logic
 ```
 
 ---
