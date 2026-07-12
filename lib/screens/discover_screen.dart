@@ -44,6 +44,7 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
     final rawQuery = ref.watch(searchQueryProvider);
     final query = rawQuery.trim().toLowerCase();
     final category = ref.watch(selectedCategoryProvider);
+    final location = ref.watch(selectedLocationProvider);
     final userSkills = ref.watch(currentUserProvider).value?.skills ?? [];
     final savedIds = ref.watch(savedOpportunityIdsProvider);
     final showSavedOnly = ref.watch(showSavedOnlyProvider);
@@ -55,11 +56,21 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
     if (category != null) {
       results = results.where((o) => o.category == category).toList();
     }
+    if (location != null) {
+      results = results.where((o) => o.location == location).toList();
+    }
     if (query.isNotEmpty) {
       results = results.where((o) {
-        final haystack = [o.title, o.startupName, ...o.requiredSkills]
-            .join(' ')
-            .toLowerCase();
+        final locationLabel =
+            o.location == LocationType.remote ? 'remote' : 'on-site onsite';
+        final haystack = [
+          o.title,
+          o.startupName,
+          o.category.label,
+          o.timeCommitment,
+          locationLabel,
+          ...o.requiredSkills,
+        ].join(' ').toLowerCase();
         return haystack.contains(query);
       }).toList();
     }
@@ -67,7 +78,9 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
       results = results.where((o) => savedIds.contains(o.id)).toList();
     }
 
-    final activeFilters = (category != null ? 1 : 0) + (showSavedOnly ? 1 : 0);
+    final activeFilters = (category != null ? 1 : 0) +
+        (location != null ? 1 : 0) +
+        (showSavedOnly ? 1 : 0);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Discover')),
@@ -97,8 +110,37 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
               ),
             ),
 
-            
-            if (activeFilters > 0)
+            // ── Location chips ────────────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.sm),
+              child: Row(
+                children: [
+                  _LocationChip(
+                    label: 'Remote',
+                    selected: location == LocationType.remote,
+                    onTap: () => ref
+                        .read(selectedLocationProvider.notifier)
+                        .set(location == LocationType.remote
+                            ? null
+                            : LocationType.remote),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  _LocationChip(
+                    label: 'On-site',
+                    selected: location == LocationType.onsite,
+                    onTap: () => ref
+                        .read(selectedLocationProvider.notifier)
+                        .set(location == LocationType.onsite
+                            ? null
+                            : LocationType.onsite),
+                  ),
+                ],
+              ),
+            ),
+
+            // ── Active filter pills ───────────────────────────────────────
+            if (category != null || showSavedOnly)
               Padding(
                 padding: const EdgeInsets.fromLTRB(
                     AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.sm),
@@ -196,6 +238,47 @@ class _DiscoverScreenState extends ConsumerState<DiscoverScreen> {
         tooltip: showSavedOnly ? 'Show all' : 'Show saved',
         child: Icon(
             showSavedOnly ? Icons.bookmark : Icons.bookmark_border),
+      ),
+    );
+  }
+}
+
+class _LocationChip extends StatelessWidget {
+  const _LocationChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = Theme.of(context).textTheme;
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.xs,
+        ),
+        decoration: BoxDecoration(
+          color: selected ? AppColors.navy : Colors.transparent,
+          borderRadius: BorderRadius.circular(AppRadius.xl),
+          border: Border.all(
+            color: selected ? AppColors.navy : AppColors.stone,
+            width: selected ? 1 : 1.2,
+          ),
+        ),
+        child: Text(
+          label,
+          style: text.labelSmall?.copyWith(
+            color: selected ? AppColors.cream : AppColors.navy,
+            fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+          ),
+        ),
       ),
     );
   }

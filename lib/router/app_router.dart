@@ -73,7 +73,15 @@ final routerProvider = Provider<GoRouter>((ref) {
   final notifier = _RouterNotifier();
 
   ref.listen(authStateChangesProvider, (_, __) => notifier.notify());
-  ref.listen(currentUserProvider, (_, __) => notifier.notify());
+
+  // Only re-run the redirect when routing-relevant user info changes:
+  // null → profile exists, or role flips. Saves/bookmarks/profile edits
+  // must NOT trigger this or GoRouter rebuilds the route and loses state.extra.
+  ref.listen(currentUserProvider, (prev, next) {
+    final prevKey = prev?.value == null ? 'null' : prev!.value!.role.name;
+    final nextKey = next.value == null ? 'null' : next.value!.role.name;
+    if (prevKey != nextKey) notifier.notify();
+  });
   ref.onDispose(notifier.dispose);
 
   return GoRouter(

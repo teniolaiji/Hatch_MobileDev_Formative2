@@ -48,17 +48,24 @@ final searchQueryProvider = NotifierProvider<SearchQueryNotifier, String>(
 final filteredOpportunitiesProvider = Provider<List<Opportunity>>((ref) {
   final query = ref.watch(searchQueryProvider).trim().toLowerCase();
   final category = ref.watch(selectedCategoryProvider);
+  final location = ref.watch(selectedLocationProvider);
   final all = _valid(ref.watch(opportunitiesProvider).value ?? []);
 
-  var results = category != null
-      ? all.where((o) => o.category == category).toList()
-      : all;
+  var results = all.where((o) {
+    if (category != null && o.category != category) return false;
+    if (location != null && o.location != location) return false;
+    return true;
+  }).toList();
 
   if (query.isEmpty) return results;
   return results.where((o) {
+    final locationLabel = o.location == LocationType.remote ? 'remote' : 'on-site onsite';
     final haystack = [
       o.title,
       o.startupName,
+      o.category.label,
+      o.timeCommitment,
+      locationLabel,
       ...o.requiredSkills,
     ].join(' ').toLowerCase();
     return haystack.contains(query);
@@ -93,3 +100,12 @@ final opportunitiesByCategoryProvider = Provider<List<Opportunity>>((ref) {
   if (category == null) return all;
   return all.where((o) => o.category == category).toList();
 });
+
+class SelectedLocation extends Notifier<LocationType?> {
+  @override
+  LocationType? build() => null;
+  void set(LocationType? value) => state = value;
+}
+
+final selectedLocationProvider =
+    NotifierProvider<SelectedLocation, LocationType?>(SelectedLocation.new);

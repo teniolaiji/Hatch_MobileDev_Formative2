@@ -59,7 +59,7 @@ class _EditAluScreenState extends ConsumerState<EditAluScreen> {
           padding: const EdgeInsets.all(AppSpacing.lg),
           children: [
             // ── Campus ─────────────────────────────────────────────────
-            Text('Campus', style: text.titleSmall),
+            Text('Campus', style: text.titleMedium?.copyWith(color: AppColors.navy)),
             const SizedBox(height: AppSpacing.sm),
             Wrap(
               spacing: AppSpacing.sm,
@@ -75,7 +75,7 @@ class _EditAluScreenState extends ConsumerState<EditAluScreen> {
             const SizedBox(height: AppSpacing.xl),
 
             // ── Programme ───────────────────────────────────────────────
-            Text('Programme', style: text.titleSmall),
+            Text('Programme', style: text.titleMedium?.copyWith(color: AppColors.navy)),
             const SizedBox(height: AppSpacing.sm),
             Wrap(
               spacing: AppSpacing.sm,
@@ -92,7 +92,7 @@ class _EditAluScreenState extends ConsumerState<EditAluScreen> {
             const SizedBox(height: AppSpacing.xl),
 
             // ── Year ─────────────────────────────────────────────────
-            Text('Year', style: text.titleSmall),
+            Text('Year', style: text.titleMedium?.copyWith(color: AppColors.navy)),
             const SizedBox(height: AppSpacing.sm),
             Wrap(
               spacing: AppSpacing.sm,
@@ -155,8 +155,8 @@ class _Chip extends StatelessWidget {
         ),
         child: Text(
           label,
-          style: text.labelMedium?.copyWith(
-            color: selected ? AppColors.cream : AppColors.textPrimary,
+          style: text.labelSmall?.copyWith(
+            color: selected ? AppColors.cream : AppColors.navy,
           ),
         ),
       ),
