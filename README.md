@@ -212,6 +212,3 @@ A read-modify-write pattern would lose concurrent entries. `arrayUnion` is atomi
 To keep dependencies minimal. Date formatting uses lightweight static string-array helpers that produce the same output.
 
 
-## License
-
-MIT
