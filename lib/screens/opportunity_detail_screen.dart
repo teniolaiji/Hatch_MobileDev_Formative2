@@ -4,10 +4,10 @@ import 'package:hatch/components/verified_badge.dart';
 import 'package:hatch/models/opportunity.dart';
 import 'package:hatch/theme/app_colors.dart';
 import 'package:hatch/theme/app_spacing.dart';
-import 'package:hatch/models/application.dart';
 import 'package:hatch/models/app_user.dart';
-import 'package:hatch/providers/application_providers.dart';
 import 'package:hatch/providers/user_providers.dart';
+import 'package:hatch/router/app_router.dart';
+import 'package:go_router/go_router.dart';
 
 class OpportunityDetailScreen extends ConsumerWidget {
   const OpportunityDetailScreen({super.key, required this.opportunity});
@@ -162,121 +162,15 @@ class OpportunityDetailScreen extends ConsumerWidget {
                       ),
                       child: const Text('Applications closed'),
                     )
-                  : _ApplyButton(opportunity: opportunity),
+                  : ElevatedButton(
+                      onPressed: () => context.push(
+                        Routes.apply,
+                        extra: opportunity,
+                      ),
+                      child: const Text('Apply for this role'),
+                    ),
             )
           : null,
-    );
-  }
-}
-
-class _ApplyButton extends ConsumerStatefulWidget {
-  const _ApplyButton({required this.opportunity});
-  final Opportunity opportunity;
-
-  @override
-  ConsumerState<_ApplyButton> createState() => _ApplyButtonState();
-}
-
-class _ApplyButtonState extends ConsumerState<_ApplyButton> {
-  bool _submitting = false;
-
-  Future<void> _apply() async {
-    final user = ref.read(currentUserProvider).value;
-    if (user == null) return;
-
-    final repo = ref.read(applicationRepositoryProvider);
-
-    final already = await repo.hasApplied(
-      applicantId: user.uid,
-      opportunityId: widget.opportunity.id,
-    );
-    if (already) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('You already applied to this role.')),
-        );
-      }
-      return;
-    }
-
-    final message = await _promptForMessage();
-    if (message == null) return; // user cancelled
-
-    setState(() => _submitting = true);
-    try {
-      await repo.submit(
-        Application(
-          id: '',
-          opportunityId: widget.opportunity.id,
-          opportunityTitle: widget.opportunity.title,
-          startupId: widget.opportunity.startupId,
-          startupName: widget.opportunity.startupName,
-          applicantId: user.uid,
-          applicantName: user.name,
-          message: message,
-          status: ApplicationStatus.submitted,
-          createdAt: DateTime.now(),
-        ),
-      );
-      if (mounted) {
-        setState(() => _submitting = false);
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Application submitted.')));
-        Navigator.of(context).maybePop();
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() => _submitting = false);
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Could not apply: $e')));
-      }
-    }
-  }
-
-  //Opens a dialog for the applicant's message.
-  Future<String?> _promptForMessage() {
-    final controller = TextEditingController();
-    return showDialog<String>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Why are you a good fit?'),
-        content: TextField(
-          controller: controller,
-          maxLines: 10,
-          decoration: const InputDecoration(
-            hintText: 'Briefly explain why this role suits you.',
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, controller.text.trim()),
-            child: const Text('Submit'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return ElevatedButton(
-      onPressed: _submitting ? null : _apply,
-      child: _submitting
-          ? SizedBox(
-              height: 20,
-              width: 20,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: Theme.of(context).colorScheme.onPrimary,
-              ),
-            )
-          : const Text('Apply for this role'),
     );
   }
 }

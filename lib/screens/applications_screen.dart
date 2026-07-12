@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hatch/components/status_badge.dart';
 import 'package:hatch/providers/application_providers.dart';
+import 'package:hatch/router/app_router.dart';
 import 'package:hatch/theme/app_colors.dart';
 import 'package:hatch/theme/app_spacing.dart';
 
@@ -41,31 +43,37 @@ class ApplicationsScreen extends ConsumerWidget {
               separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.md),
               itemBuilder: (context, i) {
                 final app = applications[i];
-                return Container(
-                  padding: const EdgeInsets.all(AppSpacing.md),
-                  decoration: BoxDecoration(
-                    color: AppColors.navy,
-                    borderRadius: BorderRadius.circular(AppRadius.lg),
-                    border: Border.all(color: AppColors.border),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(app.opportunityTitle,
-                                style: text.titleMedium
-                                    ?.copyWith(color: AppColors.cream)),
-                            const SizedBox(height: AppSpacing.xs),
-                            Text(app.startupName,
-                                style: text.bodyMedium
-                                    ?.copyWith(color: AppColors.stone)),
-                          ],
+                return GestureDetector(
+                  onTap: () => context.push(Routes.myApplicationDetail, extra: app),
+                  child: Container(
+                    padding: const EdgeInsets.all(AppSpacing.md),
+                    decoration: BoxDecoration(
+                      color: AppColors.navy,
+                      borderRadius: BorderRadius.circular(AppRadius.lg),
+                      border: Border.all(color: AppColors.border),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(app.opportunityTitle,
+                                  style: text.titleMedium
+                                      ?.copyWith(color: AppColors.cream)),
+                              const SizedBox(height: AppSpacing.xs),
+                              Text(app.startupName,
+                                  style: text.bodyMedium
+                                      ?.copyWith(color: AppColors.stone)),
+                            ],
+                          ),
                         ),
-                      ),
-                      StatusBadge(status: app.status),
-                    ],
+                        StatusBadge(status: app.status),
+                        const SizedBox(width: AppSpacing.xs),
+                        const Icon(Icons.chevron_right_rounded,
+                            color: AppColors.stone, size: 20),
+                      ],
+                    ),
                   ),
                 );
               },

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/application.dart';
+import '../models/meeting.dart';
 
 class ApplicationRepository {
   ApplicationRepository(this._db);
@@ -48,9 +49,16 @@ Stream<List<Application>> watchForStartup(String startupId) {
         ..sort((a, b) => b.createdAt.compareTo(a.createdAt)));
 }
 
-/// Update one application's status (accept or reject).
-Future<void> updateStatus(String applicationId, ApplicationStatus status) {
-  return _applications.doc(applicationId).update({'status': status.name});
-}
+  /// Update one application's status (accept or reject).
+  Future<void> updateStatus(String applicationId, ApplicationStatus status) {
+    return _applications.doc(applicationId).update({'status': status.name});
+  }
+
+  /// Append a meeting to an application using arrayUnion (concurrent-safe).
+  Future<void> addMeeting(String applicationId, Meeting meeting) {
+    return _applications.doc(applicationId).update({
+      'meetings': FieldValue.arrayUnion([meeting.toMap()]),
+    });
+  }
 }
 

@@ -17,6 +17,9 @@ class AppUser {
     this.savedOpportunities = const [],
     this.startupStage = '',
     this.website = '',
+    this.aluCampus = '',
+    this.aluProgram = '',
+    this.aluYear = '',
   });
 
   final String uid;
@@ -34,6 +37,12 @@ class AppUser {
   final String startupStage;
   /// Founder-only: startup website URL
   final String website;
+  /// Student-only: ALU campus (Rwanda / Mauritius)
+  final String aluCampus;
+  /// Student-only: ALU programme (e.g. Entrepreneurial Leadership)
+  final String aluProgram;
+  /// Student-only: current year (Year 1 – Year 4)
+  final String aluYear;
   Map<String, dynamic> toMap() => {
     'uid': uid,
     'email': email,
@@ -48,6 +57,9 @@ class AppUser {
     'savedOpportunities': savedOpportunities,
     'startupStage': startupStage,
     'website': website,
+    'aluCampus': aluCampus,
+    'aluProgram': aluProgram,
+    'aluYear': aluYear,
   };
 
   factory AppUser.fromMap(Map<String, dynamic> map) => AppUser(
@@ -69,5 +81,8 @@ class AppUser {
         List<String>.from(map['savedOpportunities'] as List? ?? []),
     startupStage: map['startupStage'] as String? ?? '',
     website: map['website'] as String? ?? '',
+    aluCampus: map['aluCampus'] as String? ?? '',
+    aluProgram: map['aluProgram'] as String? ?? '',
+    aluYear: map['aluYear'] as String? ?? '',
   );
 }

@@ -25,6 +25,9 @@ import '../screens/edit_tags_screen.dart';
 import '../screens/edit_entries_screen.dart';
 import '../screens/applicant_detail_screen.dart';
 import '../screens/edit_startup_screen.dart';
+import '../screens/edit_alu_screen.dart';
+import '../screens/apply_screen.dart';
+import '../screens/student_application_detail_screen.dart';
 import 'package:hatch/screens/applicant_detail_screen.dart';
 import 'package:hatch/models/application.dart';
 
@@ -53,6 +56,9 @@ class Routes {
   static const editExperience = '/profile/experience';
   static const editEducation = '/profile/education';
   static const editStartup = '/profile/startup';
+  static const editAlu = '/profile/alu';
+  static const apply = '/apply';
+  static const myApplicationDetail = '/student/application';
   // Applicant detail
   static const applicantDetail = '/applicant';
 }
@@ -146,6 +152,20 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: Routes.editStartup,
         builder: (_, __) => const EditStartupScreen(),
+      ),
+      GoRoute(
+        path: Routes.editAlu,
+        builder: (_, __) => const EditAluScreen(),
+      ),
+      GoRoute(
+        path: Routes.apply,
+        builder: (_, state) =>
+            ApplyScreen(opportunity: state.extra as Opportunity),
+      ),
+      GoRoute(
+        path: Routes.myApplicationDetail,
+        builder: (_, state) => StudentApplicationDetailScreen(
+            application: state.extra as Application),
       ),
       GoRoute(
         path: Routes.applicantDetail,

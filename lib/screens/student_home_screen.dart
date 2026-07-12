@@ -673,6 +673,7 @@ class _ProfileNudge extends StatelessWidget {
     final text = Theme.of(context).textTheme;
 
     final sections = [
+      (label: 'ALU context', done: user.aluCampus.isNotEmpty && user.aluProgram.isNotEmpty && user.aluYear.isNotEmpty, route: Routes.editAlu),
       (label: 'Bio', done: user.bio.isNotEmpty, route: Routes.editAbout),
       (label: 'Skills', done: user.skills.isNotEmpty, route: Routes.editSkills),
       (label: 'Interests', done: user.interests.isNotEmpty, route: Routes.editInterests),

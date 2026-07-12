@@ -83,6 +83,12 @@ class ProfileScreen extends ConsumerWidget {
               const SizedBox(height: AppSpacing.xl),
 
               _Section(
+                title: 'ALU context',
+                onEdit: () => context.push(Routes.editAlu),
+                child: _AluContext(user: user),
+              ),
+
+              _Section(
                 title: 'About',
                 onEdit: () => context.push(Routes.editAbout),
                 child: user.bio.isEmpty
@@ -214,6 +220,78 @@ class _Chips extends StatelessWidget {
         runSpacing: AppSpacing.sm,
         children: items.map((s) => Chip(label: Text(s))).toList(),
       );
+}
+
+class _AluContext extends StatelessWidget {
+  const _AluContext({required this.user});
+  final AppUser user;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = Theme.of(context).textTheme;
+    final hasAny = user.aluCampus.isNotEmpty ||
+        user.aluProgram.isNotEmpty ||
+        user.aluYear.isNotEmpty;
+
+    if (!hasAny) {
+      return const _Empty('Add your campus, programme and year.');
+    }
+
+    return Wrap(
+      spacing: AppSpacing.sm,
+      runSpacing: AppSpacing.sm,
+      children: [
+        if (user.aluCampus.isNotEmpty)
+          _InfoChip(
+            icon: Icons.location_on_outlined,
+            label: user.aluCampus,
+          ),
+        if (user.aluProgram.isNotEmpty)
+          _InfoChip(
+            icon: Icons.school_outlined,
+            label: user.aluProgram,
+          ),
+        if (user.aluYear.isNotEmpty)
+          _InfoChip(
+            icon: Icons.calendar_today_outlined,
+            label: user.aluYear,
+          ),
+      ],
+    );
+  }
+}
+
+class _InfoChip extends StatelessWidget {
+  const _InfoChip({required this.icon, required this.label});
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final text = Theme.of(context).textTheme;
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: AppSpacing.xs,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.navy.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(AppRadius.xl),
+        border: Border.all(color: AppColors.navy.withValues(alpha: 0.15)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 13, color: AppColors.navy),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: text.labelSmall?.copyWith(color: AppColors.navy),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _StartupDetails extends StatelessWidget {
