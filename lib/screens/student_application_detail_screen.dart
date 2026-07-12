@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hatch/components/status_badge.dart';
 import 'package:hatch/models/application.dart';
 import 'package:hatch/models/meeting.dart';
@@ -9,26 +10,82 @@ import 'package:hatch/theme/app_colors.dart';
 import 'package:hatch/theme/app_spacing.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class StudentApplicationDetailScreen extends ConsumerWidget {
+class StudentApplicationDetailScreen extends ConsumerStatefulWidget {
   const StudentApplicationDetailScreen({super.key, required this.application});
   final Application application;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<StudentApplicationDetailScreen> createState() =>
+      _StudentApplicationDetailScreenState();
+}
+
+class _StudentApplicationDetailScreenState
+    extends ConsumerState<StudentApplicationDetailScreen> {
+  bool _withdrawing = false;
+
+  bool _canWithdraw(ApplicationStatus status) =>
+      status == ApplicationStatus.submitted ||
+      status == ApplicationStatus.reviewing;
+
+  Future<void> _confirmWithdraw(Application live) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Withdraw application?'),
+        content: Text(
+          'Your application to ${live.startupName} will be permanently removed. '
+          'This cannot be undone.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            style: TextButton.styleFrom(
+                foregroundColor: AppColors.danger),
+            child: const Text('Withdraw'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    setState(() => _withdrawing = true);
+    try {
+      await ref
+          .read(applicationRepositoryProvider)
+          .withdraw(live.id);
+      if (mounted) context.pop();
+    } catch (e) {
+      if (mounted) {
+        setState(() => _withdrawing = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not withdraw: $e')),
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
 
     // Watch live so status + meetings update in real-time
     final live = ref
             .watch(myApplicationsProvider)
             .value
-            ?.firstWhere((a) => a.id == application.id,
-                orElse: () => application) ??
-        application;
+            ?.firstWhere((a) => a.id == widget.application.id,
+                orElse: () => widget.application) ??
+        widget.application;
 
     final isAccepted = live.status == ApplicationStatus.accepted;
 
     // Fetch founder profile for contact info (only useful if accepted)
-    final founderAsync = ref.watch(userByIdProvider(application.startupId));
+    final founderAsync =
+        ref.watch(userByIdProvider(widget.application.startupId));
     final founder = founderAsync.value;
 
     return Scaffold(
@@ -39,14 +96,15 @@ class StudentApplicationDetailScreen extends ConsumerWidget {
           children: [
             // ── Header ───────────────────────────────────────────────
             Text(
-              application.startupName.toUpperCase(),
+              widget.application.startupName.toUpperCase(),
               style: text.labelSmall?.copyWith(
                 color: AppColors.stone,
                 letterSpacing: 0.8,
               ),
             ),
             const SizedBox(height: 2),
-            Text(application.opportunityTitle, style: text.headlineMedium),
+            Text(widget.application.opportunityTitle,
+                style: text.headlineMedium),
             const SizedBox(height: AppSpacing.sm),
             StatusBadge(status: live.status),
 
@@ -76,7 +134,7 @@ class StudentApplicationDetailScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: AppSpacing.sm),
                     Text(
-                      '${application.startupName} wants you on the team. '
+                      '${widget.application.startupName} wants you on the team. '
                       'Reach out below or wait for them to schedule a meeting.',
                       style: text.bodySmall
                           ?.copyWith(color: AppColors.textSecondary),
@@ -147,24 +205,25 @@ class StudentApplicationDetailScreen extends ConsumerWidget {
                     ?.copyWith(color: AppColors.textPrimary)),
             const SizedBox(height: AppSpacing.md),
 
-            if (application.availability.isNotEmpty)
+            if (widget.application.availability.isNotEmpty)
               _Block(
                 title: 'Availability',
-                child:
-                    Text(application.availability, style: text.bodyMedium),
+                child: Text(widget.application.availability,
+                    style: text.bodyMedium),
               ),
-            if (application.message.isNotEmpty)
+            if (widget.application.message.isNotEmpty)
               _Block(
                 title: 'Cover letter',
-                child: Text(application.message, style: text.bodyMedium),
+                child: Text(widget.application.message,
+                    style: text.bodyMedium),
               ),
-            if (application.portfolioUrl.isNotEmpty)
+            if (widget.application.portfolioUrl.isNotEmpty)
               _Block(
                 title: 'Portfolio / LinkedIn',
                 child: GestureDetector(
-                  onTap: () => _launch(application.portfolioUrl),
+                  onTap: () => _launch(widget.application.portfolioUrl),
                   child: Text(
-                    application.portfolioUrl,
+                    widget.application.portfolioUrl,
                     style: text.bodyMedium?.copyWith(
                       color: AppColors.navy,
                       decoration: TextDecoration.underline,
@@ -172,13 +231,13 @@ class StudentApplicationDetailScreen extends ConsumerWidget {
                   ),
                 ),
               ),
-            if (application.cvUrl.isNotEmpty)
+            if (widget.application.cvUrl.isNotEmpty)
               _Block(
                 title: 'CV',
                 child: GestureDetector(
-                  onTap: () => _launch(application.cvUrl),
+                  onTap: () => _launch(widget.application.cvUrl),
                   child: Text(
-                    application.cvUrl,
+                    widget.application.cvUrl,
                     style: text.bodyMedium?.copyWith(
                       color: AppColors.navy,
                       decoration: TextDecoration.underline,
@@ -191,6 +250,29 @@ class StudentApplicationDetailScreen extends ConsumerWidget {
           ],
         ),
       ),
+      bottomNavigationBar: _canWithdraw(live.status)
+          ? Padding(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child: OutlinedButton(
+                onPressed: _withdrawing
+                    ? null
+                    : () => _confirmWithdraw(live),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.danger,
+                  side: const BorderSide(color: AppColors.danger),
+                ),
+                child: _withdrawing
+                    ? const SizedBox(
+                        height: 18,
+                        width: 18,
+                        child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: AppColors.danger),
+                      )
+                    : const Text('Withdraw application'),
+              ),
+            )
+          : null,
     );
   }
 

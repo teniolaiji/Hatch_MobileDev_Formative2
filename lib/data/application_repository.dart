@@ -60,5 +60,10 @@ Stream<List<Application>> watchForStartup(String startupId) {
       'meetings': FieldValue.arrayUnion([meeting.toMap()]),
     });
   }
+
+  /// Delete an application — called when a student withdraws.
+  Future<void> withdraw(String applicationId) {
+    return _applications.doc(applicationId).delete();
+  }
 }
 
